@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-  <title>Spooky Sweets: Little Ghost's Halloween Quest 🎃👻</title>
+  <title>Spooky Sweets: Cute Halloween Quest 🎃👻</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,40 +16,38 @@
     }
     body {
       font-family: 'Sniglet', cursive, sans-serif;
-      background: radial-gradient(circle at 50% 30%, #201138 0%, #0d071a 100%);
+      background: radial-gradient(circle at 50% 25%, #23113d 0%, #0d0617 100%);
     }
     .game-font {
       font-family: 'Fredoka One', cursive, sans-serif;
     }
     canvas {
       image-rendering: auto;
-      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 140, 0, 0.25);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.75), 0 0 25px rgba(255, 136, 0, 0.28);
     }
-    /* Touch controls styling */
     .touch-btn {
       touch-action: none;
       -webkit-tap-highlight-color: transparent;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
     }
     .touch-btn:active {
-      transform: scale(0.92);
+      transform: scale(0.93);
       filter: brightness(1.2);
     }
-    /* Custom bounce & glow animations */
     @keyframes spooky-glow {
-      0%, 100% { text-shadow: 0 0 8px #ff7700, 0 0 18px #ff9e00; }
-      50% { text-shadow: 0 0 15px #c035ff, 0 0 25px #ff5100; }
+      0%, 100% { text-shadow: 0 0 10px #ff7b00, 0 0 20px #ffaa00; }
+      50% { text-shadow: 0 0 16px #c040ff, 0 0 28px #ff4800; }
     }
     .glow-text {
-      animation: spooky-glow 2.5s infinite ease-in-out;
+      animation: spooky-glow 2.4s infinite ease-in-out;
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-between text-white p-2 sm:p-4 overflow-x-hidden selection:bg-orange-500 selection:text-white">
 
   <!-- Header & Status Bar -->
-  <header class="w-full max-w-4xl flex items-center justify-between py-2 px-3 sm:px-4 bg-purple-950/70 border border-purple-500/30 rounded-2xl backdrop-blur-md shadow-lg my-1">
-    <div class="flex items-center gap-2">
+  <header class="w-full max-w-4xl flex items-center justify-between py-2 px-3 sm:px-5 bg-purple-950/80 border border-purple-500/30 rounded-2xl backdrop-blur-md shadow-xl my-1 gap-2 flex-wrap sm:flex-nowrap">
+    <div class="flex items-center gap-2 sm:gap-3">
       <span class="text-2xl sm:text-3xl filter drop-shadow">👻</span>
       <div>
         <h1 class="game-font text-base sm:text-xl font-bold tracking-wide text-orange-400 glow-text leading-tight">Spooky Sweets</h1>
@@ -57,98 +55,112 @@
       </div>
     </div>
 
-    <!-- HUD Stats -->
-    <div class="flex items-center gap-3 sm:gap-6 text-sm sm:text-base font-bold">
-      <!-- Stage -->
+    <!-- HUD Stats & Quick Toggles -->
+    <div class="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm font-bold flex-wrap justify-end">
+      <!-- Stage Indicator -->
       <div class="flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-xl border border-purple-400/20">
         <span class="text-yellow-400">🏰</span>
-        <span id="level-display" class="text-purple-100 text-xs sm:text-sm">Lvl 1</span>
+        <span id="level-display" class="text-purple-100 font-mono">Stage 1</span>
       </div>
 
-      <!-- Candies -->
+      <!-- Candies Counter -->
       <div class="flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-xl border border-orange-400/30">
-        <span class="text-lg animate-bounce">🍬</span>
-        <span id="candy-display" class="text-orange-300 font-mono text-xs sm:text-sm">0 / 0</span>
+        <span class="text-base animate-bounce">🍬</span>
+        <span id="candy-display" class="text-orange-300 font-mono">0 / 0</span>
       </div>
 
-      <!-- Lives (Hearts) -->
-      <div class="flex items-center gap-1 bg-black/40 px-2.5 py-1 rounded-xl border border-pink-400/20" id="lives-display">
+      <!-- Lives Display (Hearts or Infinity) -->
+      <div class="flex items-center gap-1 bg-black/40 px-2.5 py-1 rounded-xl border border-pink-400/20 min-w-[70px] justify-center" id="lives-display">
         <span class="text-pink-400">💖</span>
         <span class="text-pink-400">💖</span>
         <span class="text-pink-400">💖</span>
       </div>
 
-      <!-- Sound Toggle -->
-      <button id="sound-btn" class="p-1.5 sm:p-2 bg-purple-800/80 hover:bg-purple-700 active:scale-90 transition rounded-xl text-base" title="Toggle Sound">
+      <!-- Infinite Lives Toggle Button in HUD -->
+      <button id="godmode-hud-btn" class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border font-mono text-xs transition active:scale-95 bg-purple-900/70 border-purple-400/40 text-purple-200 hover:border-yellow-400" title="Toggle Infinite Lives (God Mode)">
+        <span id="godmode-icon">🛡️</span>
+        <span id="godmode-text">Infinite: OFF</span>
+      </button>
+
+      <!-- Sound Toggle Button -->
+      <button id="sound-btn" class="p-1.5 sm:p-2 bg-purple-900/80 hover:bg-purple-800 active:scale-90 transition rounded-xl text-sm sm:text-base border border-purple-400/30" title="Mute / Unmute Audio">
         🔊
       </button>
     </div>
   </header>
 
-  <!-- Main Canvas Wrapper with Overlays -->
+  <!-- Main Game Canvas Container with Overlay UI -->
   <main class="relative w-full max-w-4xl flex-grow flex items-center justify-center my-1">
     <div class="relative w-full aspect-[16/9] max-h-[70vh] rounded-2xl overflow-hidden border-2 border-orange-500/40 shadow-2xl bg-black">
       <canvas id="gameCanvas" class="w-full h-full block"></canvas>
 
-      <!-- Overlay: Start / Level Complete / Game Over / Win -->
-      <div id="ui-overlay" class="absolute inset-0 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center transition-all duration-300">
-        <div id="modal-content" class="max-w-md w-full bg-gradient-to-b from-purple-900/90 to-purple-950/95 border-2 border-orange-400/60 rounded-3xl p-6 sm:p-8 shadow-2xl">
-          <div id="modal-emoji" class="text-5xl sm:text-6xl mb-3 animate-pulse">🎃</div>
+      <!-- Interactive Modal Overlay: Start / Level Complete / Game Over / Victory -->
+      <div id="ui-overlay" class="absolute inset-0 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-6 text-center transition-all duration-300 z-20">
+        <div id="modal-content" class="max-w-md w-full bg-gradient-to-b from-purple-900/95 via-purple-950/95 to-black/95 border-2 border-orange-400/60 rounded-3xl p-5 sm:p-8 shadow-2xl">
+          <div id="modal-emoji" class="text-5xl sm:text-6xl mb-2 animate-pulse">🎃</div>
           <h2 id="modal-title" class="game-font text-2xl sm:text-3xl text-orange-400 font-bold mb-2 glow-text">Spooky Sweets</h2>
-          <p id="modal-desc" class="text-sm sm:text-base text-purple-200 mb-6 leading-relaxed">
-            Help the cute little ghost collect all the delicious Halloween treats to unlock the magic portal!
+          <p id="modal-desc" class="text-xs sm:text-sm text-purple-200 mb-5 leading-relaxed">
+            Help the cute little ghost collect all the delicious sweets to unlock the magical gateway!
           </p>
-          <button id="modal-action-btn" class="game-font w-full py-3 px-6 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold rounded-2xl shadow-lg shadow-orange-500/40 transform active:scale-95 transition-all text-lg">
+
+          <!-- In-Modal Infinite Lives Toggle Option -->
+          <div class="mb-5 flex items-center justify-center gap-3 bg-purple-950/80 p-2.5 rounded-2xl border border-yellow-500/30">
+            <label for="godmode-modal-checkbox" class="flex items-center gap-2 text-xs sm:text-sm font-bold text-yellow-300 cursor-pointer">
+              <input type="checkbox" id="godmode-modal-checkbox" class="w-4 h-4 text-orange-500 rounded border-purple-400 focus:ring-orange-400 bg-purple-900 cursor-pointer">
+              <span>🛡️ Infinite Lives (God Mode)</span>
+            </label>
+          </div>
+
+          <button id="modal-action-btn" class="game-font w-full py-3 px-6 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-600 text-white font-bold rounded-2xl shadow-lg shadow-orange-500/40 transform active:scale-95 transition-all text-base sm:text-lg">
             Start Adventure 🍬
           </button>
-          
-          <!-- Key guide in start modal -->
-          <div id="modal-controls" class="mt-4 pt-4 border-t border-purple-700/50 text-xs text-purple-300 flex justify-around">
-            <span>⌨️ <b>A/D</b> or <b>←/→</b> to Move</span>
-            <span>⌨️ <b>W</b> / <b>↑</b> / <b>Space</b> to Jump</span>
+
+          <!-- Control Instructions -->
+          <div id="modal-controls" class="mt-4 pt-4 border-t border-purple-700/50 text-[11px] sm:text-xs text-purple-300 flex justify-around">
+            <span>⌨️ <b>A/D</b> or <b>←/→</b> Move</span>
+            <span>⌨️ <b>W</b> / <b>↑</b> / <b>Space</b> Jump</span>
           </div>
         </div>
       </div>
     </div>
   </main>
 
-  <!-- On-Screen Touch Controls (optimized for Mobile & Tablet) -->
+  <!-- On-Screen Touch Controls for Mobile and Tablets -->
   <div class="w-full max-w-4xl flex items-center justify-between px-3 py-2 sm:hidden text-lg">
-    <!-- Left / Right D-Pad -->
+    <!-- Left / Right Movement Buttons -->
     <div class="flex gap-2">
-      <button id="touch-left" class="touch-btn w-14 h-14 bg-purple-900/80 border-2 border-purple-400/40 rounded-2xl flex items-center justify-center active:bg-orange-500 transition text-2xl">
+      <button id="touch-left" class="touch-btn w-14 h-14 bg-purple-900/90 border-2 border-purple-400/50 rounded-2xl flex items-center justify-center active:bg-orange-500 text-2xl font-bold">
         ◀
       </button>
-      <button id="touch-right" class="touch-btn w-14 h-14 bg-purple-900/80 border-2 border-purple-400/40 rounded-2xl flex items-center justify-center active:bg-orange-500 transition text-2xl">
+      <button id="touch-right" class="touch-btn w-14 h-14 bg-purple-900/90 border-2 border-purple-400/50 rounded-2xl flex items-center justify-center active:bg-orange-500 text-2xl font-bold">
         ▶
       </button>
     </div>
 
-    <!-- Quick instructions -->
-    <div class="text-[11px] text-purple-300/80 text-center px-1">
-      Tap buttons to move & jump!
+    <!-- Quick Touch Reminder -->
+    <div class="text-[11px] text-purple-300/80 text-center px-1 font-mono">
+      Tap arrows to move, button to jump!
     </div>
 
     <!-- Jump Button -->
-    <button id="touch-jump" class="touch-btn w-16 h-14 bg-gradient-to-r from-orange-500 to-amber-500 border-2 border-orange-300 rounded-2xl font-bold flex items-center justify-center text-white active:brightness-125 transition text-xl shadow-lg">
+    <button id="touch-jump" class="touch-btn w-18 px-5 h-14 bg-gradient-to-r from-orange-500 to-amber-500 border-2 border-orange-300 rounded-2xl font-bold flex items-center justify-center text-white active:brightness-125 text-base shadow-lg">
       ▲ Jump
     </button>
   </div>
 
-  <!-- Footer Info for GitHub Pages -->
+  <!-- Footer Information -->
   <footer class="w-full max-w-4xl text-center py-1 text-xs text-purple-400/70 flex flex-wrap justify-between items-center px-2">
-    <span>🎃 Created with pure HTML5 Canvas & Web Audio API</span>
+    <span>🎃 Built with HTML5 Canvas & Web Audio API</span>
     <span>Hostable directly on <b>GitHub Pages</b></span>
   </footer>
 
-  <!-- Complete Game Logic Script -->
   <script>
     /**
-     * SPOOKY SWEETS - A Cute Halloween Platformer
-     * Pure Canvas & Vanilla JS - Zero dependencies, zero external assets
+     * SPOOKY SWEETS - Cute Halloween Platformer
+     * Single-file implementation, zero external sound/image dependencies.
      */
 
-    // --- Web Audio API Sound Synthesizer (No external sound files required) ---
+    // --- Web Audio API Synthesizer ---
     class SoundEngine {
       constructor() {
         this.ctx = null;
@@ -174,15 +186,15 @@
 
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(260, t);
-        osc.frequency.exponentialRampToValueAtTime(540, t + 0.14);
+        osc.frequency.exponentialRampToValueAtTime(560, t + 0.13);
 
-        gain.gain.setValueAtTime(0.2, t);
-        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+        gain.gain.setValueAtTime(0.18, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.14);
 
         osc.connect(gain);
         gain.connect(this.ctx.destination);
         osc.start(t);
-        osc.stop(t + 0.15);
+        osc.stop(t + 0.14);
       }
 
       playCandy() {
@@ -193,17 +205,37 @@
         const gain = this.ctx.createGain();
 
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(650, t);
-        osc.frequency.setValueAtTime(880, t + 0.06);
-        osc.frequency.setValueAtTime(1170, t + 0.12);
+        osc.frequency.setValueAtTime(620, t);
+        osc.frequency.setValueAtTime(840, t + 0.05);
+        osc.frequency.setValueAtTime(1120, t + 0.11);
 
         gain.gain.setValueAtTime(0.18, t);
-        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.22);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
 
         osc.connect(gain);
         gain.connect(this.ctx.destination);
         osc.start(t);
-        osc.stop(t + 0.23);
+        osc.stop(t + 0.21);
+      }
+
+      playBounce() {
+        if (!this.enabled) return;
+        this.init();
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(420, t);
+        osc.frequency.exponentialRampToValueAtTime(820, t + 0.12);
+
+        gain.gain.setValueAtTime(0.18, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.13);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.14);
       }
 
       playHurt() {
@@ -214,8 +246,8 @@
         const gain = this.ctx.createGain();
 
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(280, t);
-        osc.frequency.exponentialRampToValueAtTime(90, t + 0.22);
+        osc.frequency.setValueAtTime(270, t);
+        osc.frequency.exponentialRampToValueAtTime(80, t + 0.22);
 
         gain.gain.setValueAtTime(0.25, t);
         gain.gain.exponentialRampToValueAtTime(0.01, t + 0.23);
@@ -231,15 +263,15 @@
         this.init();
         const t = this.ctx.currentTime;
         const notes = [440, 554.37, 659.25, 880];
-        notes.forEach((freq, index) => {
+        notes.forEach((freq, idx) => {
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
-          const startTime = t + index * 0.1;
+          const startTime = t + idx * 0.09;
 
           osc.type = 'sine';
           osc.frequency.setValueAtTime(freq, startTime);
 
-          gain.gain.setValueAtTime(0.2, startTime);
+          gain.gain.setValueAtTime(0.18, startTime);
           gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.25);
 
           osc.connect(gain);
@@ -253,29 +285,29 @@
         if (!this.enabled) return;
         this.init();
         const t = this.ctx.currentTime;
-        const notes = [320, 290, 260, 220];
-        notes.forEach((freq, index) => {
+        const notes = [320, 280, 240, 200];
+        notes.forEach((freq, idx) => {
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
-          const startTime = t + index * 0.15;
+          const startTime = t + idx * 0.14;
 
           osc.type = 'sawtooth';
           osc.frequency.setValueAtTime(freq, startTime);
 
           gain.gain.setValueAtTime(0.2, startTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.25);
+          gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.24);
 
           osc.connect(gain);
           gain.connect(this.ctx.destination);
           osc.start(startTime);
-          osc.stop(startTime + 0.26);
+          osc.stop(startTime + 0.25);
         });
       }
     }
 
     const sound = new SoundEngine();
 
-    // Toggle sound button
+    // Sound toggle button
     const soundBtn = document.getElementById('sound-btn');
     soundBtn.addEventListener('click', () => {
       sound.enabled = !sound.enabled;
@@ -287,7 +319,6 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Virtual Coordinate System (1280 x 720) for crisp, deterministic physics & responsive scaling
     const V_WIDTH = 1280;
     const V_HEIGHT = 720;
     canvas.width = V_WIDTH;
@@ -305,8 +336,8 @@
         this.maxLife = life;
         this.shape = shape;
         const angle = Math.random() * Math.PI * 2;
-        this.vx = Math.cos(angle) * speed * (0.4 + Math.random() * 0.8);
-        this.vy = Math.sin(angle) * speed * (0.4 + Math.random() * 0.8) - 1.5;
+        this.vx = Math.cos(angle) * speed * (0.3 + Math.random() * 0.8);
+        this.vy = Math.sin(angle) * speed * (0.3 + Math.random() * 0.8) - 1.2;
         this.gravity = 0.08;
       }
 
@@ -324,7 +355,6 @@
         c.globalAlpha = Math.max(0, this.life / this.maxLife);
         c.beginPath();
         if (this.shape === 'star') {
-          // Tiny diamond/star
           c.rect(this.x - this.size, this.y - this.size, this.size * 2, this.size * 2);
         } else {
           c.arc(this.x, this.y, this.size, 0, Math.PI * 2);
@@ -336,14 +366,14 @@
 
     let particles = [];
 
-    function spawnBurst(x, y, colorArray, count = 18, speed = 4) {
+    function spawnBurst(x, y, colorArray, count = 16, speed = 3.5, shape = 'circle') {
       for (let i = 0; i < count; i++) {
         const col = colorArray[Math.floor(Math.random() * colorArray.length)];
-        particles.push(new Particle(x, y, col, speed, 3 + Math.random() * 4, 25 + Math.random() * 20));
+        particles.push(new Particle(x, y, col, speed, 3 + Math.random() * 3.5, 20 + Math.random() * 20, shape));
       }
     }
 
-    // --- Floating Spooky Background Elements (Fog, Stars, Fireflies) ---
+    // --- Floating Environment Atmosphere (Stars & Fireflies) ---
     const stars = Array.from({ length: 45 }, () => ({
       x: Math.random() * V_WIDTH,
       y: Math.random() * (V_HEIGHT * 0.65),
@@ -358,21 +388,18 @@
       radius: Math.random() * 3 + 2,
       angle: Math.random() * Math.PI * 2,
       speed: 0.02 + Math.random() * 0.03,
-      color: Math.random() > 0.5 ? '#a3e635' : '#facc15'
+      color: Math.random() > 0.5 ? '#bef264' : '#fde047'
     }));
 
-    // --- Level Definitions ---
-    // Levels feature ground platforms, jumping islands, candy collectibles, patrolling bats, and spiders.
+    // --- Level Stage Configurations ---
     const LEVELS = [
       {
         name: "Stage 1: Pumpkin Patch 🎃",
-        shortName: "Lvl 1: Patch",
+        shortName: "Stage 1: Patch",
         skyGrad: ['#23103a', '#431259', '#140727'],
         moonColor: '#ffeaa7',
         platforms: [
-          // Ground floor
           { x: 0, y: 640, w: 1280, h: 80, type: 'ground' },
-          // Step platforms
           { x: 180, y: 520, w: 160, h: 26 },
           { x: 380, y: 420, w: 180, h: 26 },
           { x: 620, y: 340, w: 170, h: 26 },
@@ -390,12 +417,10 @@
           { x: 680, y: 590, type: 'candyCorn' }
         ],
         enemies: [
-          // Patrolling mini bat
           { x: 420, y: 370, minX: 380, maxX: 540, vx: 2.2, type: 'bat', w: 34, h: 24 },
           { x: 880, y: 390, minX: 860, maxX: 1020, vx: 2.4, type: 'bat', w: 34, h: 24 }
         ],
         hazards: [
-          // Thorns on ground
           { x: 540, y: 620, w: 90, h: 20 }
         ],
         decorations: [
@@ -408,14 +433,13 @@
       },
       {
         name: "Stage 2: Haunted Forest 🌲👻",
-        shortName: "Lvl 2: Forest",
+        shortName: "Stage 2: Forest",
         skyGrad: ['#0f172a', '#2e1065', '#090514'],
         moonColor: '#fed7aa',
         platforms: [
           { x: 0, y: 650, w: 300, h: 70, type: 'ground' },
           { x: 380, y: 650, w: 300, h: 70, type: 'ground' },
           { x: 770, y: 650, w: 510, h: 70, type: 'ground' },
-          // Floating wooden boards
           { x: 120, y: 500, w: 150, h: 24 },
           { x: 320, y: 410, w: 150, h: 24 },
           { x: 540, y: 330, w: 180, h: 24 },
@@ -435,12 +459,10 @@
         ],
         enemies: [
           { x: 550, y: 290, minX: 540, maxX: 700, vx: 2.6, type: 'bat', w: 34, h: 24 },
-          // Bouncing spider buddy
           { x: 850, y: 590, minX: 800, maxX: 1040, vx: 2.0, type: 'spider', w: 32, h: 26 },
           { x: 340, y: 370, minX: 320, maxX: 450, vx: 2.2, type: 'bat', w: 34, h: 24 }
         ],
         hazards: [
-          // Thorns in pits
           { x: 300, y: 680, w: 80, h: 40 },
           { x: 680, y: 680, w: 90, h: 40 }
         ],
@@ -454,7 +476,7 @@
       },
       {
         name: "Stage 3: Spooky Castle Gate 🏰✨",
-        shortName: "Lvl 3: Castle",
+        shortName: "Stage 3: Castle",
         skyGrad: ['#1e0a29', '#3b0764', '#05010a'],
         moonColor: '#ffedd5',
         platforms: [
@@ -487,7 +509,7 @@
           { x: 760, y: 520, minX: 740, maxX: 920, vx: 2.2, type: 'spider', w: 32, h: 26 }
         ],
         hazards: [
-          { x: 260, y: 700, w: 1020, h: 20 } // Giant mist spike abyss
+          { x: 260, y: 700, w: 1020, h: 20 }
         ],
         decorations: [
           { x: 40, y: 650, type: 'tombstone' },
@@ -499,21 +521,21 @@
       }
     ];
 
-    // --- Player Class (Little Cute Ghost with Witch Hat) ---
+    // --- Player Ghost Class ---
     class Player {
       constructor() {
-        this.resetPosition();
         this.w = 44;
         this.h = 52;
         this.vx = 0;
         this.vy = 0;
-        this.speed = 5.2;
-        this.jumpForce = -13.6;
+        this.speed = 5.3;
+        this.jumpForce = -13.8;
         this.gravity = 0.52;
         this.grounded = false;
-        this.facing = 1; // 1 = right, -1 = left
+        this.facing = 1;
         this.floatOffset = 0;
         this.invulnerableTimer = 0;
+        this.resetPosition();
       }
 
       resetPosition(x = 60, y = 560) {
@@ -523,11 +545,11 @@
         this.vy = 0;
         this.grounded = false;
         this.facing = 1;
-        this.invulnerableTimer = 60; // Brief spawn protection
+        this.invulnerableTimer = 50;
       }
 
-      update(keys, platforms) {
-        // Horizontal Movement
+      update(keys, platforms, isGodMode) {
+        // Horizontal motion
         if (keys.left) {
           this.vx = -this.speed;
           this.facing = -1;
@@ -535,11 +557,11 @@
           this.vx = this.speed;
           this.facing = 1;
         } else {
-          this.vx *= 0.72; // Smooth friction
+          this.vx *= 0.72;
           if (Math.abs(this.vx) < 0.1) this.vx = 0;
         }
 
-        // Jump
+        // Jump logic
         if (keys.jump && this.grounded) {
           this.vy = this.jumpForce;
           this.grounded = false;
@@ -547,20 +569,19 @@
           spawnBurst(this.x + this.w / 2, this.y + this.h, ['#e9d5ff', '#c084fc', '#ffffff'], 8, 2.5);
         }
 
-        // Apply Gravity
+        // Gravity
         this.vy += this.gravity;
-        if (this.vy > 14) this.vy = 14; // Terminal fall velocity
+        if (this.vy > 14) this.vy = 14;
 
-        // Horizontal Collision
+        // Position Updates
         this.x += this.vx;
-        // World boundaries
         if (this.x < 10) this.x = 10;
         if (this.x + this.w > V_WIDTH - 10) this.x = V_WIDTH - 10 - this.w;
 
-        // Vertical Collision & Platform Stomping
         this.y += this.vy;
         this.grounded = false;
 
+        // Platform collision
         platforms.forEach(plat => {
           if (
             this.x + this.w > plat.x &&
@@ -575,107 +596,128 @@
           }
         });
 
-        // Floating animation oscillation
+        // Hover bobbing
         this.floatOffset = Math.sin(Date.now() * 0.007) * 4;
 
         if (this.invulnerableTimer > 0) {
           this.invulnerableTimer--;
         }
+
+        // Spawn magical sparkling trail if God Mode is on
+        if (isGodMode && Math.random() < 0.25) {
+          spawnBurst(this.x + this.w / 2, this.y + this.h / 2, ['#fde047', '#f59e0b', '#ffffff'], 1, 1.2, 'star');
+        }
       }
 
-      draw(c) {
+      draw(c, isGodMode) {
         c.save();
 
-        // Flash when invulnerable
         if (this.invulnerableTimer > 0 && Math.floor(Date.now() / 90) % 2 === 0) {
-          c.globalAlpha = 0.45;
+          c.globalAlpha = 0.5;
         }
 
         const cx = this.x + this.w / 2;
         const cy = this.y + this.h / 2 + (this.grounded ? 0 : this.floatOffset);
 
         c.translate(cx, cy);
+
+        // --- God Mode Protective Shield & Halo ---
+        if (isGodMode) {
+          const auraPulse = Math.sin(Date.now() * 0.008) * 3;
+          // Golden Protective Forcefield
+          c.strokeStyle = 'rgba(250, 204, 21, 0.75)';
+          c.lineWidth = 2.5;
+          c.shadowColor = '#facc15';
+          c.shadowBlur = 18;
+          c.beginPath();
+          c.arc(0, 0, 34 + auraPulse, 0, Math.PI * 2);
+          c.stroke();
+
+          // Golden Angelic / Saintly Halo above Witch Hat
+          c.strokeStyle = '#fef08a';
+          c.lineWidth = 3;
+          c.beginPath();
+          c.ellipse(0, -48 + auraPulse * 0.5, 20, 6, 0, 0, Math.PI * 2);
+          c.stroke();
+          c.shadowBlur = 0;
+        }
+
         if (this.facing === -1) {
           c.scale(-1, 1);
         }
 
         // Ghost outer glow
-        c.shadowColor = 'rgba(255, 230, 255, 0.7)';
-        c.shadowBlur = 15;
+        c.shadowColor = isGodMode ? 'rgba(250, 204, 21, 0.8)' : 'rgba(243, 232, 255, 0.8)';
+        c.shadowBlur = 16;
 
         // 1. Ghost Body
         c.fillStyle = '#ffffff';
         c.beginPath();
-        // Head dome
         c.arc(0, -8, 20, Math.PI, 0, false);
-        // Body sides & skirt ripples
         c.lineTo(20, 16);
         const t = Date.now() * 0.01;
         const wave1 = Math.sin(t) * 3;
         const wave2 = Math.cos(t) * 3;
 
-        // Cute wavy skirt
+        // Cute undulating wavy skirt
         c.bezierCurveTo(14, 23 + wave1, 8, 16, 0, 22 + wave2);
         c.bezierCurveTo(-8, 16, -14, 23 - wave1, -20, 16);
         c.lineTo(-20, -8);
         c.closePath();
         c.fill();
 
-        // Reset shadow for facial features
         c.shadowBlur = 0;
 
-        // 2. Cute Blushing Cheeks
-        c.fillStyle = 'rgba(255, 130, 170, 0.65)';
+        // 2. Rosy Cheeks
+        c.fillStyle = 'rgba(255, 130, 170, 0.7)';
         c.beginPath();
         c.arc(12, 1, 4, 0, Math.PI * 2);
         c.arc(-4, 1, 3.5, 0, Math.PI * 2);
         c.fill();
 
-        // 3. Adorable Oval Eyes
+        // 3. Expressive Eyes
         c.fillStyle = '#1e1b4b';
         c.beginPath();
         c.ellipse(10, -5, 3.5, 5, 0, 0, Math.PI * 2);
         c.ellipse(-3, -5, 3.5, 5, 0, 0, Math.PI * 2);
         c.fill();
 
-        // Eye sparkles
+        // Eye glints
         c.fillStyle = '#ffffff';
         c.beginPath();
         c.arc(11, -7, 1.4, 0, Math.PI * 2);
         c.arc(-2, -7, 1.4, 0, Math.PI * 2);
         c.fill();
 
-        // Cute little smile
+        // Smile
         c.strokeStyle = '#431407';
         c.lineWidth = 1.6;
         c.lineCap = 'round';
         c.beginPath();
-        c.arc(3.5, 2, 3, 0.1, Math.PI * 0.9);
+        c.arc(3.5, 2, 3.2, 0.1, Math.PI * 0.9);
         c.stroke();
 
-        // 4. Little Witch Hat! 🧙‍♀️
+        // 4. Little Witch Hat
         c.fillStyle = '#311042';
-        // Hat brim
         c.beginPath();
         c.ellipse(0, -26, 25, 6, -0.15, 0, Math.PI * 2);
         c.fill();
 
-        // Hat cone
         c.beginPath();
         c.moveTo(-15, -27);
-        c.quadraticCurveTo(-6, -48, 14, -54); // Curled tip
+        c.quadraticCurveTo(-6, -48, 14, -54);
         c.quadraticCurveTo(4, -36, 15, -25);
         c.closePath();
         c.fill();
 
-        // Hat orange ribbon band
+        // Orange hat belt
         c.strokeStyle = '#ff7700';
         c.lineWidth = 4;
         c.beginPath();
         c.ellipse(0, -27, 14, 3.5, -0.12, 0, Math.PI);
         c.stroke();
 
-        // Tiny gold hat buckle
+        // Hat buckle
         c.fillStyle = '#facc15';
         c.fillRect(-2, -30, 5, 4);
 
@@ -683,10 +725,11 @@
       }
     }
 
-    // --- Game State Controller ---
+    // --- Game State Management ---
     const gameState = {
       currentLevelIndex: 0,
       lives: 3,
+      infiniteLives: false,
       candiesCollected: 0,
       totalCandiesInLevel: 0,
       portalActive: false,
@@ -697,10 +740,14 @@
 
     const player = new Player();
 
-    // --- UI Update Helpers ---
+    // --- DOM Elements ---
     const levelDisplay = document.getElementById('level-display');
     const candyDisplay = document.getElementById('candy-display');
     const livesDisplay = document.getElementById('lives-display');
+    const godmodeHudBtn = document.getElementById('godmode-hud-btn');
+    const godmodeIcon = document.getElementById('godmode-icon');
+    const godmodeText = document.getElementById('godmode-text');
+    const godmodeModalCheckbox = document.getElementById('godmode-modal-checkbox');
     const uiOverlay = document.getElementById('ui-overlay');
     const modalEmoji = document.getElementById('modal-emoji');
     const modalTitle = document.getElementById('modal-title');
@@ -708,19 +755,51 @@
     const modalActionBtn = document.getElementById('modal-action-btn');
     const modalControls = document.getElementById('modal-controls');
 
+    // Synchronize Infinite Lives across all UI components
+    function setInfiniteLives(enabled) {
+      gameState.infiniteLives = enabled;
+      godmodeModalCheckbox.checked = enabled;
+
+      if (enabled) {
+        godmodeHudBtn.classList.remove('bg-purple-900/70', 'border-purple-400/40', 'text-purple-200');
+        godmodeHudBtn.classList.add('bg-yellow-500/20', 'border-yellow-400', 'text-yellow-300');
+        godmodeText.textContent = 'Infinite: ON';
+        godmodeIcon.textContent = '🛡️';
+      } else {
+        godmodeHudBtn.classList.add('bg-purple-900/70', 'border-purple-400/40', 'text-purple-200');
+        godmodeHudBtn.classList.remove('bg-yellow-500/20', 'border-yellow-400', 'text-yellow-300');
+        godmodeText.textContent = 'Infinite: OFF';
+        godmodeIcon.textContent = '🛡️';
+      }
+      updateHUD();
+    }
+
+    godmodeHudBtn.addEventListener('click', () => {
+      setInfiniteLives(!gameState.infiniteLives);
+      sound.playJump();
+    });
+
+    godmodeModalCheckbox.addEventListener('change', (e) => {
+      setInfiniteLives(e.target.checked);
+    });
+
     function updateHUD() {
       levelDisplay.textContent = LEVELS[gameState.currentLevelIndex].shortName;
       candyDisplay.textContent = `${gameState.candiesCollected} / ${gameState.totalCandiesInLevel}`;
 
-      let heartsHtml = '';
-      for (let i = 0; i < 3; i++) {
-        if (i < gameState.lives) {
-          heartsHtml += '<span class="text-pink-400">💖</span>';
-        } else {
-          heartsHtml += '<span class="text-gray-500 opacity-40">🖤</span>';
+      if (gameState.infiniteLives) {
+        livesDisplay.innerHTML = '<span class="text-yellow-300 font-extrabold text-xl px-1">∞ Lives</span>';
+      } else {
+        let heartsHtml = '';
+        for (let i = 0; i < 3; i++) {
+          if (i < gameState.lives) {
+            heartsHtml += '<span class="text-pink-400">💖</span>';
+          } else {
+            heartsHtml += '<span class="text-gray-500 opacity-40">🖤</span>';
+          }
         }
+        livesDisplay.innerHTML = heartsHtml;
       }
-      livesDisplay.innerHTML = heartsHtml;
     }
 
     function showModal(title, desc, btnText, emoji = '🎃', showControls = false) {
@@ -739,20 +818,19 @@
     // --- Level Loading ---
     function loadLevel(index) {
       gameState.currentLevelIndex = index;
-      const rawLevel = LEVELS[index];
+      const raw = LEVELS[index];
 
-      // Deep clone level items so collected items don't disappear on reset
       gameState.levelData = {
-        name: rawLevel.name,
-        shortName: rawLevel.shortName,
-        skyGrad: rawLevel.skyGrad,
-        moonColor: rawLevel.moonColor,
-        platforms: JSON.parse(JSON.stringify(rawLevel.platforms)),
-        candies: rawLevel.candies.map(c => ({ ...c, collected: false })),
-        enemies: JSON.parse(JSON.stringify(rawLevel.enemies)),
-        hazards: JSON.parse(JSON.stringify(rawLevel.hazards)),
-        decorations: JSON.parse(JSON.stringify(rawLevel.decorations)),
-        portal: { ...rawLevel.portal }
+        name: raw.name,
+        shortName: raw.shortName,
+        skyGrad: raw.skyGrad,
+        moonColor: raw.moonColor,
+        platforms: JSON.parse(JSON.stringify(raw.platforms)),
+        candies: raw.candies.map(c => ({ ...c, collected: false })),
+        enemies: JSON.parse(JSON.stringify(raw.enemies)),
+        hazards: JSON.parse(JSON.stringify(raw.hazards)),
+        decorations: JSON.parse(JSON.stringify(raw.decorations)),
+        portal: { ...raw.portal }
       };
 
       gameState.candiesCollected = 0;
@@ -777,19 +855,62 @@
         gameState.state = 'PLAYING';
         hideModal();
       } else {
-        // Victory!
         gameState.state = 'VICTORY';
         sound.playWin();
         showModal(
           "Halloween Cleared! 🎉👻",
-          "You helped the little ghost gather all the treats across every spooky realm! You are the sweetest spirit in town!",
+          "You helped the little ghost gather every single treat and conquer the spooky castle! You are the sweetest spirit in town!",
           "Play Again 🍬",
           "👑"
         );
       }
     }
 
-    // --- Input Handlers (Keyboard & Touch) ---
+    // --- Damage / Pit Handling ---
+    function playerHurtOrBounce() {
+      if (player.invulnerableTimer > 0) return;
+
+      if (gameState.infiniteLives) {
+        // God Mode: Gentle bouncy deflection without losing hearts
+        sound.playBounce();
+        player.vy = -8.5; // gentle bounce back up
+        player.invulnerableTimer = 25;
+        spawnBurst(player.x + player.w / 2, player.y + player.h / 2, ['#fde047', '#ffffff', '#fb923c'], 14, 4, 'star');
+        return;
+      }
+
+      // Normal mode: Lose life
+      sound.playHurt();
+      spawnBurst(player.x + player.w / 2, player.y + player.h / 2, ['#ff4444', '#ff77aa', '#ffffff'], 20, 5);
+      gameState.lives--;
+      updateHUD();
+
+      if (gameState.lives <= 0) {
+        gameState.state = 'GAMEOVER';
+        sound.playGameOver();
+        showModal(
+          "Spooky Oof! 🎃",
+          "The little ghost ran out of sweet energy! Don't fret, ghosts can float back up anytime!",
+          "Try Again 🍭",
+          "💀"
+        );
+      } else {
+        player.resetPosition(60, 560);
+      }
+    }
+
+    function handlePitFall() {
+      if (gameState.infiniteLives) {
+        // In Infinite mode: Teleport safely back to start with gentle particles
+        sound.playBounce();
+        player.resetPosition(60, 560);
+        spawnBurst(player.x + player.w / 2, player.y + player.h / 2, ['#fde047', '#a855f7', '#ffffff'], 22, 5, 'star');
+      } else {
+        playerHurtOrBounce();
+      }
+    }
+
+    // --- Inputs Handlers ---
     window.addEventListener('keydown', (e) => {
       if (e.repeat) return;
       if (e.code === 'KeyA' || e.code === 'ArrowLeft') gameState.keys.left = true;
@@ -807,7 +928,6 @@
       }
     });
 
-    // Touch Buttons Setup
     const setupTouchBtn = (id, keyName) => {
       const btn = document.getElementById(id);
       if (!btn) return;
@@ -825,7 +945,6 @@
     setupTouchBtn('touch-right', 'right');
     setupTouchBtn('touch-jump', 'jump');
 
-    // Modal action button click
     modalActionBtn.addEventListener('click', () => {
       sound.init();
       if (gameState.state === 'MENU' || gameState.state === 'GAMEOVER' || gameState.state === 'VICTORY') {
@@ -835,33 +954,8 @@
       }
     });
 
-    // --- Player Damage / Life Loss ---
-    function playerHit() {
-      if (player.invulnerableTimer > 0) return;
-
-      sound.playHurt();
-      spawnBurst(player.x + player.w / 2, player.y + player.h / 2, ['#ff4444', '#ff77aa', '#ffffff'], 20, 5);
-      gameState.lives--;
-      updateHUD();
-
-      if (gameState.lives <= 0) {
-        gameState.state = 'GAMEOVER';
-        sound.playGameOver();
-        showModal(
-          "Spooky Oof! 🎃",
-          "The little ghost ran out of sweet energy! Don't worry, ghosts can always float back up!",
-          "Try Again 🍭",
-          "💀"
-        );
-      } else {
-        // Respawn at starting point
-        player.resetPosition(60, 560);
-      }
-    }
-
-    // --- Decorative Drawing Routines ---
+    // --- Drawing Routines ---
     function drawSkyAndMoon(c, level) {
-      // 1. Sky Gradient
       const grad = c.createLinearGradient(0, 0, 0, V_HEIGHT);
       grad.addColorStop(0, level.skyGrad[0]);
       grad.addColorStop(0.65, level.skyGrad[1]);
@@ -869,28 +963,28 @@
       c.fillStyle = grad;
       c.fillRect(0, 0, V_WIDTH, V_HEIGHT);
 
-      // 2. Stars
+      // Twinkling stars
       stars.forEach(s => {
         s.alpha += s.blinkSpeed;
-        const currentAlpha = 0.3 + Math.abs(Math.sin(s.alpha)) * 0.7;
+        const currentAlpha = 0.25 + Math.abs(Math.sin(s.alpha)) * 0.75;
         c.fillStyle = `rgba(255, 255, 230, ${currentAlpha})`;
         c.beginPath();
         c.arc(s.x, s.y, s.size, 0, Math.PI * 2);
         c.fill();
       });
 
-      // 3. Glowing Big Moon
-      const mx = 1050;
-      const my = 140;
-      const mRadius = 64;
+      // Glowing Harvest Moon
+      const mx = 1060;
+      const my = 135;
+      const mRadius = 66;
 
-      const moonGlow = c.createRadialGradient(mx, my, mRadius * 0.5, mx, my, mRadius * 2.2);
-      moonGlow.addColorStop(0, 'rgba(254, 240, 138, 0.5)');
+      const moonGlow = c.createRadialGradient(mx, my, mRadius * 0.5, mx, my, mRadius * 2.3);
+      moonGlow.addColorStop(0, 'rgba(254, 240, 138, 0.55)');
       moonGlow.addColorStop(0.5, 'rgba(251, 146, 60, 0.2)');
       moonGlow.addColorStop(1, 'rgba(0,0,0,0)');
       c.fillStyle = moonGlow;
       c.beginPath();
-      c.arc(mx, my, mRadius * 2.2, 0, Math.PI * 2);
+      c.arc(mx, my, mRadius * 2.3, 0, Math.PI * 2);
       c.fill();
 
       // Moon body
@@ -899,15 +993,15 @@
       c.arc(mx, my, mRadius, 0, Math.PI * 2);
       c.fill();
 
-      // Subtle craters
-      c.fillStyle = 'rgba(0, 0, 0, 0.07)';
+      // Moon craters
+      c.fillStyle = 'rgba(0, 0, 0, 0.08)';
       c.beginPath();
       c.arc(mx - 18, my - 12, 14, 0, Math.PI * 2);
       c.arc(mx + 22, my + 14, 18, 0, Math.PI * 2);
       c.arc(mx - 6, my + 26, 10, 0, Math.PI * 2);
       c.fill();
 
-      // 4. Fireflies
+      // Fireflies
       fireflies.forEach(f => {
         f.angle += f.speed;
         const fy = f.y + Math.sin(f.angle) * 12;
@@ -925,7 +1019,6 @@
     function drawPlatform(c, p) {
       c.save();
       if (p.type === 'ground') {
-        // Ground brick/earth texture
         const grad = c.createLinearGradient(0, p.y, 0, p.y + p.h);
         grad.addColorStop(0, '#381647');
         grad.addColorStop(0.2, '#210d2b');
@@ -933,24 +1026,21 @@
         c.fillStyle = grad;
         c.fillRect(p.x, p.y, p.w, p.h);
 
-        // Top grass/spooky trim
+        // Grass trim
         c.fillStyle = '#6b21a8';
         c.fillRect(p.x, p.y, p.w, 6);
         c.fillStyle = '#a855f7';
         c.fillRect(p.x, p.y, p.w, 2);
       } else {
-        // Floating wooden/runic islands
         c.fillStyle = '#4c1d95';
         c.beginPath();
         c.roundRect(p.x, p.y, p.w, p.h, 10);
         c.fill();
 
-        // Edge highlight
         c.strokeStyle = '#c084fc';
         c.lineWidth = 2.5;
         c.stroke();
 
-        // Decorative rune lines
         c.fillStyle = '#7c3aed';
         c.fillRect(p.x + 12, p.y + 4, p.w - 24, 3);
       }
@@ -964,8 +1054,6 @@
 
       c.save();
       c.translate(cx, cy);
-
-      // Sweet candy shine glow
       c.shadowColor = '#fde047';
       c.shadowBlur = 12;
 
@@ -979,7 +1067,7 @@
         c.fillStyle = '#f97316';
         c.fill();
 
-        // Top white tip
+        // Tip white
         c.beginPath();
         c.moveTo(0, -14);
         c.lineTo(5, -4);
@@ -988,7 +1076,7 @@
         c.fillStyle = '#ffffff';
         c.fill();
 
-        // Bottom yellow base
+        // Base yellow
         c.beginPath();
         c.moveTo(-9, 3);
         c.lineTo(9, 3);
@@ -998,7 +1086,7 @@
         c.fillStyle = '#facc15';
         c.fill();
       } else if (item.type === 'pumpkinSweet') {
-        // Cute mini pumpkin candy
+        // Cute Mini Pumpkin Candy
         c.fillStyle = '#f97316';
         c.beginPath();
         c.ellipse(0, 0, 13, 10, 0, 0, Math.PI * 2);
@@ -1012,20 +1100,17 @@
         c.fillRect(-2, -14, 4, 6);
       } else {
         // Wrapped Swirl Candy
-        // Wrappers left/right
         c.fillStyle = '#e879f9';
         c.beginPath();
         c.moveTo(-10, 0); c.lineTo(-18, -6); c.lineTo(-18, 6); c.closePath();
         c.moveTo(10, 0); c.lineTo(18, -6); c.lineTo(18, 6); c.closePath();
         c.fill();
 
-        // Candy round center
         c.fillStyle = '#f43f5e';
         c.beginPath();
         c.arc(0, 0, 10, 0, Math.PI * 2);
         c.fill();
 
-        // Candy white stripe
         c.fillStyle = '#ffffff';
         c.beginPath();
         c.arc(0, 0, 5, 0, Math.PI * 2);
@@ -1040,42 +1125,40 @@
       c.translate(e.x + e.w / 2, e.y + e.h / 2);
       if (e.vx < 0) c.scale(-1, 1);
 
-      // Flapping wing calculation
       const flap = Math.sin(Date.now() * 0.015) * 8;
 
       // Bat wings
       c.fillStyle = '#581c87';
       c.beginPath();
-      // Right wing
       c.moveTo(0, -2);
       c.quadraticCurveTo(14, -14 - flap, 24, -4 - flap);
       c.quadraticCurveTo(16, 8, 4, 4);
-      // Left wing
+
       c.moveTo(0, -2);
       c.quadraticCurveTo(-14, -14 - flap, -24, -4 - flap);
       c.quadraticCurveTo(-16, 8, -4, 4);
       c.fill();
 
-      // Bat cute round body
+      // Bat body
       c.fillStyle = '#2e1065';
       c.beginPath();
       c.arc(0, 0, 10, 0, Math.PI * 2);
       c.fill();
 
-      // Bat ears
+      // Ears
       c.beginPath();
       c.moveTo(-7, -7); c.lineTo(-10, -16); c.lineTo(-2, -9);
       c.moveTo(7, -7); c.lineTo(10, -16); c.lineTo(2, -9);
       c.fill();
 
-      // Red glowing eyes
+      // Red eyes
       c.fillStyle = '#ff2255';
       c.beginPath();
       c.arc(3, -2, 2.2, 0, Math.PI * 2);
       c.arc(-3, -2, 2.2, 0, Math.PI * 2);
       c.fill();
 
-      // Tiny white fangs
+      // Fangs
       c.fillStyle = '#ffffff';
       c.beginPath();
       c.moveTo(-3, 3); c.lineTo(-2, 6); c.lineTo(-1, 3);
@@ -1090,7 +1173,7 @@
       const bounce = Math.abs(Math.sin(Date.now() * 0.01)) * 6;
       c.translate(s.x + s.w / 2, s.y + s.h / 2 - bounce);
 
-      // Spider thread hanging
+      // Web line
       c.strokeStyle = 'rgba(255, 255, 255, 0.4)';
       c.lineWidth = 1.2;
       c.beginPath();
@@ -1102,23 +1185,21 @@
       c.strokeStyle = '#1e1b4b';
       c.lineWidth = 2.4;
       const legSpread = Math.sin(Date.now() * 0.012) * 3;
-      // Left legs
       c.beginPath();
       c.moveTo(-4, 0); c.lineTo(-16, -6 + legSpread); c.lineTo(-22, 6);
       c.moveTo(-4, 4); c.lineTo(-17, 8 + legSpread); c.lineTo(-20, 18);
-      // Right legs
       c.moveTo(4, 0); c.lineTo(16, -6 - legSpread); c.lineTo(22, 6);
       c.moveTo(4, 4); c.lineTo(17, 8 - legSpread); c.lineTo(20, 18);
       c.stroke();
 
-      // Spider body
+      // Body
       c.fillStyle = '#311042';
       c.beginPath();
       c.arc(0, 0, 12, 0, Math.PI * 2);
       c.fill();
 
-      // Spider eyes (lots of cute purple dots)
-      c.fillStyle = '#a855f7';
+      // Eyes
+      c.fillStyle = '#c084fc';
       c.beginPath();
       c.arc(-4, -2, 2.5, 0, Math.PI * 2);
       c.arc(4, -2, 2.5, 0, Math.PI * 2);
@@ -1142,7 +1223,6 @@
         c.closePath();
         c.fill();
 
-        // Spike tip highlight
         c.strokeStyle = '#ef4444';
         c.lineWidth = 1.2;
         c.stroke();
@@ -1158,7 +1238,6 @@
           c.translate(d.x, d.y);
           c.scale(s, s);
 
-          // Pumpkin Body
           c.fillStyle = '#ea580c';
           c.beginPath();
           c.ellipse(0, -16, 20, 16, 0, 0, Math.PI * 2);
@@ -1169,15 +1248,13 @@
           c.ellipse(0, -16, 12, 16, 0, 0, Math.PI * 2);
           c.fill();
 
-          // Jack-o'-lantern glowing eyes & smile!
+          // Jack-o'-lantern face
           c.fillStyle = '#fef08a';
           c.shadowColor = '#facc15';
           c.shadowBlur = 10;
           c.beginPath();
-          // Eyes
           c.moveTo(-9, -20); c.lineTo(-5, -20); c.lineTo(-7, -24); c.closePath();
           c.moveTo(9, -20); c.lineTo(5, -20); c.lineTo(7, -24); c.closePath();
-          // Grin
           c.moveTo(-10, -13);
           c.lineTo(-6, -10);
           c.lineTo(-3, -12);
@@ -1191,7 +1268,7 @@
           c.fill();
           c.shadowBlur = 0;
 
-          // Green stem
+          // Stem
           c.fillStyle = '#15803d';
           c.fillRect(-2, -34, 4, 6);
         } else if (d.type === 'tombstone') {
@@ -1201,7 +1278,6 @@
           c.roundRect(-16, -38, 32, 38, [12, 12, 2, 2]);
           c.fill();
 
-          // RIP text
           c.fillStyle = '#334155';
           c.font = '10px sans-serif';
           c.textAlign = 'center';
@@ -1217,7 +1293,6 @@
           c.quadraticCurveTo(-15, -70, -25, -130);
           c.stroke();
 
-          // Spooky bare branches
           c.lineWidth = 7;
           c.beginPath();
           c.moveTo(-15, -60); c.lineTo(-50, -90);
@@ -1228,7 +1303,7 @@
           c.translate(d.x, d.y);
           c.fillStyle = '#fde68a';
           c.fillRect(-4, -18, 8, 18);
-          // Flame
+
           c.fillStyle = '#f97316';
           c.shadowColor = '#facc15';
           c.shadowBlur = 8;
@@ -1247,7 +1322,6 @@
       c.translate(cx, cy);
 
       if (isActive) {
-        // Glowing animated swirling vortex
         const t = Date.now() * 0.005;
         const outerGlow = c.createRadialGradient(0, 0, 10, 0, 0, 48);
         outerGlow.addColorStop(0, 'rgba(244, 63, 94, 0.9)');
@@ -1258,7 +1332,6 @@
         c.arc(0, 0, 52, 0, Math.PI * 2);
         c.fill();
 
-        // Swirling Portal Rim
         c.save();
         c.rotate(t);
         c.strokeStyle = '#facc15';
@@ -1269,19 +1342,16 @@
         c.stroke();
         c.restore();
 
-        // Inner magical core
         c.fillStyle = '#ffffff';
         c.beginPath();
         c.ellipse(0, 0, 14, 28, 0, 0, Math.PI * 2);
         c.fill();
 
-        // Floating hint text
         c.fillStyle = '#fde047';
         c.font = 'bold 13px Fredoka One, sans-serif';
         c.textAlign = 'center';
         c.fillText('OPEN! ➜', 0, -48 + Math.sin(Date.now() * 0.008) * 3);
       } else {
-        // Inactive Gothic stone door frame
         c.fillStyle = '#2e1065';
         c.beginPath();
         c.roundRect(-portal.w / 2, -portal.h / 2, portal.w, portal.h, [26, 26, 4, 4]);
@@ -1290,14 +1360,12 @@
         c.lineWidth = 3;
         c.stroke();
 
-        // Locked keyhole
         c.fillStyle = '#a855f7';
         c.beginPath();
         c.arc(0, -2, 5, 0, Math.PI * 2);
         c.rect(-2.5, 0, 5, 8);
         c.fill();
 
-        // Lock icon text
         c.font = '14px sans-serif';
         c.textAlign = 'center';
         c.fillText('🔒', 0, -20);
@@ -1306,37 +1374,33 @@
     }
 
     // --- Main Game Loop ---
-    let lastTime = 0;
-
-    function gameLoop(time) {
+    function gameLoop() {
       requestAnimationFrame(gameLoop);
 
-      // Clear frame
       ctx.clearRect(0, 0, V_WIDTH, V_HEIGHT);
-
       if (!gameState.levelData) return;
 
       const level = gameState.levelData;
 
-      // 1. Draw Background & Sky
+      // 1. Background, moon, and fireflies
       drawSkyAndMoon(ctx, level);
 
-      // 2. Draw Scenic Props
+      // 2. Scenic decorations
       drawDecorations(ctx, level.decorations);
 
-      // 3. Draw Hazards (Thorns)
+      // 3. Hazards (spikes)
       level.hazards.forEach(h => drawHazard(ctx, h));
 
-      // 4. Draw Platforms
+      // 4. Platforms
       level.platforms.forEach(p => drawPlatform(ctx, p));
 
-      // 5. Draw Portal
+      // 5. Portal
       drawPortal(ctx, level.portal, gameState.portalActive);
 
-      // 6. Draw Candies
+      // 6. Candies
       level.candies.forEach(candy => drawCandy(ctx, candy));
 
-      // 7. Update & Draw Enemies
+      // 7. Enemies & Collision Check
       level.enemies.forEach(e => {
         if (gameState.state === 'PLAYING') {
           e.x += e.vx;
@@ -1348,14 +1412,13 @@
             e.vx *= -1;
           }
 
-          // Player collision with enemy
           if (
             player.x + player.w > e.x &&
             player.x < e.x + e.w &&
             player.y + player.h > e.y &&
             player.y < e.y + e.h
           ) {
-            playerHit();
+            playerHurtOrBounce();
           }
         }
 
@@ -1366,7 +1429,7 @@
         }
       });
 
-      // 8. Hazard (Thorn/Pit) Collision Check
+      // 8. Hazard & Pit Collisions
       if (gameState.state === 'PLAYING') {
         level.hazards.forEach(h => {
           if (
@@ -1375,17 +1438,16 @@
             player.y + player.h > h.y &&
             player.y < h.y + h.h
           ) {
-            playerHit();
+            playerHurtOrBounce();
           }
         });
 
-        // Pit bottom death check
-        if (player.y > V_HEIGHT + 40) {
-          playerHit();
+        if (player.y > V_HEIGHT + 30) {
+          handlePitFall();
         }
       }
 
-      // 9. Candy Collection Check
+      // 9. Candy Collection
       if (gameState.state === 'PLAYING') {
         level.candies.forEach(candy => {
           if (!candy.collected) {
@@ -1400,7 +1462,6 @@
               spawnBurst(candy.x, candy.y, ['#fde047', '#fb923c', '#ffffff'], 14, 3.5);
               updateHUD();
 
-              // Check if all collected
               if (gameState.candiesCollected >= gameState.totalCandiesInLevel) {
                 gameState.portalActive = true;
                 sound.playJump();
@@ -1419,17 +1480,16 @@
             player.y + player.h > port.y &&
             player.y < port.y + port.h
           ) {
-            // Level Cleared!
             gameState.state = 'LEVEL_CLEARED';
             sound.playWin();
             spawnBurst(player.x + player.w / 2, player.y + player.h / 2, ['#38bdf8', '#c084fc', '#facc15', '#ffffff'], 45, 6);
 
             const isLast = gameState.currentLevelIndex + 1 >= LEVELS.length;
             showModal(
-              isLast ? "All Realms Cleared! 🎃" : "Stage Clear! 🍬",
+              isLast ? "All Stages Cleared! 🎃" : "Stage Clear! 🍬",
               isLast
-                ? "Incredible job! You unlocked the Grand Halloween Gateway!"
-                : `You collected all the candies in ${level.name}! Ready for the next spooky realm?`,
+                ? "Incredible job! You unlocked the Grand Halloween Gateway and saved all treats!"
+                : `You collected every sweet in ${level.name}! Ready for the next spooky realm?`,
               isLast ? "Claim Victory! 👑" : "Next Stage ➜",
               "🌟"
             );
@@ -1437,27 +1497,27 @@
         }
       }
 
-      // 11. Update & Draw Particles
+      // 11. Particles update & render
       particles = particles.filter(p => p.life > 0);
       particles.forEach(p => {
         p.update();
         p.draw(ctx);
       });
 
-      // 12. Update & Draw Player
+      // 12. Player update & render
       if (gameState.state === 'PLAYING') {
-        player.update(gameState.keys, level.platforms);
+        player.update(gameState.keys, level.platforms, gameState.infiniteLives);
       }
-      player.draw(ctx);
+      player.draw(ctx, gameState.infiniteLives);
     }
 
-    // Start in initial Menu mode
+    // Initialize Menu & Start Loop
     window.onload = function() {
       loadLevel(0);
       gameState.state = 'MENU';
       showModal(
         "Spooky Sweets 🎃",
-        "A cute Halloween adventure! Float with the little ghost, dodge tricky bats and spiders, and gather every delicious treat to open the portal!",
+        "A cute Halloween adventure! Float with the little ghost, dodge bats and spiders, and gather every sweet treat to open the magic portal!",
         "Play Game 🍬",
         "👻",
         true
