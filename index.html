@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+  <title>Spooky Sweets: Little Ghost's Halloween Quest 🎃👻</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Sniglet:wght@400;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    body {
+      font-family: 'Sniglet', cursive, sans-serif;
+      background: radial-gradient(circle at 50% 30%, #201138 0%, #0d071a 100%);
+    }
+    .game-font {
+      font-family: 'Fredoka One', cursive, sans-serif;
+    }
+    canvas {
+      image-rendering: auto;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 140, 0, 0.25);
+    }
+    /* Touch controls styling */
+    .touch-btn {
+      touch-action: none;
+      -webkit-tap-highlight-color: transparent;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+    }
+    .touch-btn:active {
+      transform: scale(0.92);
+      filter: brightness(1.2);
+    }
+    /* Custom bounce & glow animations */
+    @keyframes spooky-glow {
+      0%, 100% { text-shadow: 0 0 8px #ff7700, 0 0 18px #ff9e00; }
+      50% { text-shadow: 0 0 15px #c035ff, 0 0 25px #ff5100; }
+    }
+    .glow-text {
+      animation: spooky-glow 2.5s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between text-white p-2 sm:p-4 overflow-x-hidden selection:bg-orange-500 selection:text-white">
+
+  <!-- Header & Status Bar -->
+  <header class="w-full max-w-4xl flex items-center justify-between py-2 px-3 sm:px-4 bg-purple-950/70 border border-purple-500/30 rounded-2xl backdrop-blur-md shadow-lg my-1">
+    <div class="flex items-center gap-2">
+      <span class="text-2xl sm:text-3xl filter drop-shadow">👻</span>
+      <div>
+        <h1 class="game-font text-base sm:text-xl font-bold tracking-wide text-orange-400 glow-text leading-tight">Spooky Sweets</h1>
+        <p class="text-[11px] sm:text-xs text-purple-200">Halloween Adventure</p>
+      </div>
+    </div>
+
+    <!-- HUD Stats -->
+    <div class="flex items-center gap-3 sm:gap-6 text-sm sm:text-base font-bold">
+      <!-- Stage -->
+      <div class="flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-xl border border-purple-400/20">
+        <span class="text-yellow-400">🏰</span>
+        <span id="level-display" class="text-purple-100 text-xs sm:text-sm">Lvl 1</span>
+      </div>
+
+      <!-- Candies -->
+      <div class="flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-xl border border-orange-400/30">
+        <span class="text-lg animate-bounce">🍬</span>
+        <span id="candy-display" class="text-orange-300 font-mono text-xs sm:text-sm">0 / 0</span>
+      </div>
+
+      <!-- Lives (Hearts) -->
+      <div class="flex items-center gap-1 bg-black/40 px-2.5 py-1 rounded-xl border border-pink-400/20" id="lives-display">
+        <span class="text-pink-400">💖</span>
+        <span class="text-pink-400">💖</span>
+        <span class="text-pink-400">💖</span>
+      </div>
+
+      <!-- Sound Toggle -->
+      <button id="sound-btn" class="p-1.5 sm:p-2 bg-purple-800/80 hover:bg-purple-700 active:scale-90 transition rounded-xl text-base" title="Toggle Sound">
+        🔊
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Canvas Wrapper with Overlays -->
+  <main class="relative w-full max-w-4xl flex-grow flex items-center justify-center my-1">
+    <div class="relative w-full aspect-[16/9] max-h-[70vh] rounded-2xl overflow-hidden border-2 border-orange-500/40 shadow-2xl bg-black">
+      <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+
+      <!-- Overlay: Start / Level Complete / Game Over / Win -->
+      <div id="ui-overlay" class="absolute inset-0 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center transition-all duration-300">
+        <div id="modal-content" class="max-w-md w-full bg-gradient-to-b from-purple-900/90 to-purple-950/95 border-2 border-orange-400/60 rounded-3xl p-6 sm:p-8 shadow-2xl">
+          <div id="modal-emoji" class="text-5xl sm:text-6xl mb-3 animate-pulse">🎃</div>
+          <h2 id="modal-title" class="game-font text-2xl sm:text-3xl text-orange-400 font-bold mb-2 glow-text">Spooky Sweets</h2>
+          <p id="modal-desc" class="text-sm sm:text-base text-purple-200 mb-6 leading-relaxed">
+            Help the cute little ghost collect all the delicious Halloween treats to unlock the magic portal!
+          </p>
+          <button id="modal-action-btn" class="game-font w-full py-3 px-6 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold rounded-2xl shadow-lg shadow-orange-500/40 transform active:scale-95 transition-all text-lg">
+            Start Adventure 🍬
+          </button>
+          
+          <!-- Key guide in start modal -->
+          <div id="modal-controls" class="mt-4 pt-4 border-t border-purple-700/50 text-xs text-purple-300 flex justify-around">
+            <span>⌨️ <b>A/D</b> or <b>←/→</b> to Move</span>
+            <span>⌨️ <b>W</b> / <b>↑</b> / <b>Space</b> to Jump</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- On-Screen Touch Controls (optimized for Mobile & Tablet) -->
+  <div class="w-full max-w-4xl flex items-center justify-between px-3 py-2 sm:hidden text-lg">
+    <!-- Left / Right D-Pad -->
+    <div class="flex gap-2">
+      <button id="touch-left" class="touch-btn w-14 h-14 bg-purple-900/80 border-2 border-purple-400/40 rounded-2xl flex items-center justify-center active:bg-orange-500 transition text-2xl">
+        ◀
+      </button>
+      <button id="touch-right" class="touch-btn w-14 h-14 bg-purple-900/80 border-2 border-purple-400/40 rounded-2xl flex items-center justify-center active:bg-orange-500 transition text-2xl">
+        ▶
+      </button>
+    </div>
+
+    <!-- Quick instructions -->
+    <div class="text-[11px] text-purple-300/80 text-center px-1">
+      Tap buttons to move & jump!
+    </div>
+
+    <!-- Jump Button -->
+    <button id="touch-jump" class="touch-btn w-16 h-14 bg-gradient-to-r from-orange-500 to-amber-500 border-2 border-orange-300 rounded-2xl font-bold flex items-center justify-center text-white active:brightness-125 transition text-xl shadow-lg">
+      ▲ Jump
+    </button>
+  </div>
+
+  <!-- Footer Info for GitHub Pages -->
+  <footer class="w-full max-w-4xl text-center py-1 text-xs text-purple-400/70 flex flex-wrap justify-between items-center px-2">
+    <span>🎃 Created with pure HTML5 Canvas & Web Audio API</span>
+    <span>Hostable directly on <b>GitHub Pages</b></span>
+  </footer>
+
+  <!-- Complete Game Logic Script -->
+  <script>
+    /**
+     * SPOOKY SWEETS - A Cute Halloween Platformer
+     * Pure Canvas & Vanilla JS - Zero dependencies, zero external assets
+     */
+
+    // --- Web Audio API Sound Synthesizer (No external sound files required) ---
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playJump() {
+        if (!this.enabled) return;
+        this.init();
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(260, t);
+        osc.frequency.exponentialRampToValueAtTime(540, t + 0.14);
+
+        gain.gain.setValueAtTime(0.2, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.15);
+      }
+
+      playCandy() {
+        if (!this.enabled) return;
+        this.init();
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(650, t);
+        osc.frequency.setValueAtTime(880, t + 0.06);
+        osc.frequency.setValueAtTime(1170, t + 0.12);
+
+        gain.gain.setValueAtTime(0.18, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.22);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.23);
+      }
+
+      playHurt() {
+        if (!this.enabled) return;
+        this.init();
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(280, t);
+        osc.frequency.exponentialRampToValueAtTime(90, t + 0.22);
+
+        gain.gain.setValueAtTime(0.25, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.23);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.24);
+      }
+
+      playWin() {
+        if (!this.enabled) return;
+        this.init();
+        const t = this.ctx.currentTime;
+        const notes = [440, 554.37, 659.25, 880];
+        notes.forEach((freq, index) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          const startTime = t + index * 0.1;
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, startTime);
+
+          gain.gain.setValueAtTime(0.2, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.25);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(startTime);
+          osc.stop(startTime + 0.26);
+        });
+      }
+
+      playGameOver() {
+        if (!this.enabled) return;
+        this.init();
+        const t = this.ctx.currentTime;
+        const notes = [320, 290, 260, 220];
+        notes.forEach((freq, index) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          const startTime = t + index * 0.15;
+
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, startTime);
+
+          gain.gain.setValueAtTime(0.2, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.25);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(startTime);
+          osc.stop(startTime + 0.26);
+        });
+      }
+    }
+
+    const sound = new SoundEngine();
+
+    // Toggle sound button
+    const soundBtn = document.getElementById('sound-btn');
+    soundBtn.addEventListener('click', () => {
+      sound.enabled = !sound.enabled;
+      soundBtn.textContent = sound.enabled ? '🔊' : '🔇';
+      soundBtn.classList.toggle('opacity-50', !sound.enabled);
+    });
+
+    // --- Canvas & Rendering Setup ---
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Virtual Coordinate System (1280 x 720) for crisp, deterministic physics & responsive scaling
+    const V_WIDTH = 1280;
+    const V_HEIGHT = 720;
+    canvas.width = V_WIDTH;
+    canvas.height = V_HEIGHT;
+
+    // --- Particle System ---
+    class Particle {
+      constructor(x, y, color, speed, size, life, shape = 'circle') {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.size = size;
+        this.baseSize = size;
+        this.life = life;
+        this.maxLife = life;
+        this.shape = shape;
+        const angle = Math.random() * Math.PI * 2;
+        this.vx = Math.cos(angle) * speed * (0.4 + Math.random() * 0.8);
+        this.vy = Math.sin(angle) * speed * (0.4 + Math.random() * 0.8) - 1.5;
+        this.gravity = 0.08;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += this.gravity;
+        this.life--;
+        this.size = Math.max(0, this.baseSize * (this.life / this.maxLife));
+      }
+
+      draw(c) {
+        c.save();
+        c.fillStyle = this.color;
+        c.globalAlpha = Math.max(0, this.life / this.maxLife);
+        c.beginPath();
+        if (this.shape === 'star') {
+          // Tiny diamond/star
+          c.rect(this.x - this.size, this.y - this.size, this.size * 2, this.size * 2);
+        } else {
+          c.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        }
+        c.fill();
+        c.restore();
+      }
+    }
+
+    let particles = [];
+
+    function spawnBurst(x, y, colorArray, count = 18, speed = 4) {
+      for (let i = 0; i < count; i++) {
+        const col = colorArray[Math.floor(Math.random() * colorArray.length)];
+        particles.push(new Particle(x, y, col, speed, 3 + Math.random() * 4, 25 + Math.random() * 20));
+      }
+    }
+
+    // --- Floating Spooky Background Elements (Fog, Stars, Fireflies) ---
+    const stars = Array.from({ length: 45 }, () => ({
+      x: Math.random() * V_WIDTH,
+      y: Math.random() * (V_HEIGHT * 0.65),
+      size: Math.random() * 2.5 + 1,
+      blinkSpeed: 0.02 + Math.random() * 0.03,
+      alpha: Math.random()
+    }));
+
+    const fireflies = Array.from({ length: 16 }, () => ({
+      x: Math.random() * V_WIDTH,
+      y: 200 + Math.random() * 450,
+      radius: Math.random() * 3 + 2,
+      angle: Math.random() * Math.PI * 2,
+      speed: 0.02 + Math.random() * 0.03,
+      color: Math.random() > 0.5 ? '#a3e635' : '#facc15'
+    }));
+
+    // --- Level Definitions ---
+    // Levels feature ground platforms, jumping islands, candy collectibles, patrolling bats, and spiders.
+    const LEVELS = [
+      {
+        name: "Stage 1: Pumpkin Patch 🎃",
+        shortName: "Lvl 1: Patch",
+        skyGrad: ['#23103a', '#431259', '#140727'],
+        moonColor: '#ffeaa7',
+        platforms: [
+          // Ground floor
+          { x: 0, y: 640, w: 1280, h: 80, type: 'ground' },
+          // Step platforms
+          { x: 180, y: 520, w: 160, h: 26 },
+          { x: 380, y: 420, w: 180, h: 26 },
+          { x: 620, y: 340, w: 170, h: 26 },
+          { x: 860, y: 440, w: 180, h: 26 },
+          { x: 1060, y: 310, w: 160, h: 26 },
+          { x: 440, y: 220, w: 200, h: 26 }
+        ],
+        candies: [
+          { x: 250, y: 470, type: 'candyCorn' },
+          { x: 460, y: 370, type: 'wrappedCandy' },
+          { x: 700, y: 290, type: 'pumpkinSweet' },
+          { x: 940, y: 390, type: 'candyCorn' },
+          { x: 1140, y: 260, type: 'wrappedCandy' },
+          { x: 530, y: 170, type: 'pumpkinSweet' },
+          { x: 680, y: 590, type: 'candyCorn' }
+        ],
+        enemies: [
+          // Patrolling mini bat
+          { x: 420, y: 370, minX: 380, maxX: 540, vx: 2.2, type: 'bat', w: 34, h: 24 },
+          { x: 880, y: 390, minX: 860, maxX: 1020, vx: 2.4, type: 'bat', w: 34, h: 24 }
+        ],
+        hazards: [
+          // Thorns on ground
+          { x: 540, y: 620, w: 90, h: 20 }
+        ],
+        decorations: [
+          { x: 90, y: 640, type: 'pumpkin', size: 1.2 },
+          { x: 800, y: 640, type: 'pumpkin', size: 1.0 },
+          { x: 1220, y: 640, type: 'tombstone' },
+          { x: 210, y: 520, type: 'candle' }
+        ],
+        portal: { x: 1120, y: 230, w: 54, h: 80 }
+      },
+      {
+        name: "Stage 2: Haunted Forest 🌲👻",
+        shortName: "Lvl 2: Forest",
+        skyGrad: ['#0f172a', '#2e1065', '#090514'],
+        moonColor: '#fed7aa',
+        platforms: [
+          { x: 0, y: 650, w: 300, h: 70, type: 'ground' },
+          { x: 380, y: 650, w: 300, h: 70, type: 'ground' },
+          { x: 770, y: 650, w: 510, h: 70, type: 'ground' },
+          // Floating wooden boards
+          { x: 120, y: 500, w: 150, h: 24 },
+          { x: 320, y: 410, w: 150, h: 24 },
+          { x: 540, y: 330, w: 180, h: 24 },
+          { x: 780, y: 260, w: 160, h: 24 },
+          { x: 1010, y: 360, w: 180, h: 24 },
+          { x: 620, y: 510, w: 170, h: 24 }
+        ],
+        candies: [
+          { x: 190, y: 450, type: 'wrappedCandy' },
+          { x: 390, y: 360, type: 'pumpkinSweet' },
+          { x: 620, y: 280, type: 'candyCorn' },
+          { x: 850, y: 210, type: 'wrappedCandy' },
+          { x: 1090, y: 310, type: 'pumpkinSweet' },
+          { x: 700, y: 460, type: 'candyCorn' },
+          { x: 840, y: 600, type: 'pumpkinSweet' },
+          { x: 500, y: 600, type: 'wrappedCandy' }
+        ],
+        enemies: [
+          { x: 550, y: 290, minX: 540, maxX: 700, vx: 2.6, type: 'bat', w: 34, h: 24 },
+          // Bouncing spider buddy
+          { x: 850, y: 590, minX: 800, maxX: 1040, vx: 2.0, type: 'spider', w: 32, h: 26 },
+          { x: 340, y: 370, minX: 320, maxX: 450, vx: 2.2, type: 'bat', w: 34, h: 24 }
+        ],
+        hazards: [
+          // Thorns in pits
+          { x: 300, y: 680, w: 80, h: 40 },
+          { x: 680, y: 680, w: 90, h: 40 }
+        ],
+        decorations: [
+          { x: 50, y: 650, type: 'tree' },
+          { x: 800, y: 650, type: 'tree' },
+          { x: 240, y: 650, type: 'pumpkin', size: 0.9 },
+          { x: 1170, y: 650, type: 'tombstone' }
+        ],
+        portal: { x: 850, y: 180, w: 54, h: 80 }
+      },
+      {
+        name: "Stage 3: Spooky Castle Gate 🏰✨",
+        shortName: "Lvl 3: Castle",
+        skyGrad: ['#1e0a29', '#3b0764', '#05010a'],
+        moonColor: '#ffedd5',
+        platforms: [
+          { x: 0, y: 650, w: 260, h: 70, type: 'ground' },
+          { x: 320, y: 580, w: 140, h: 24 },
+          { x: 510, y: 480, w: 150, h: 24 },
+          { x: 260, y: 380, w: 160, h: 24 },
+          { x: 80, y: 280, w: 160, h: 24 },
+          { x: 340, y: 200, w: 190, h: 24 },
+          { x: 650, y: 230, w: 180, h: 24 },
+          { x: 910, y: 310, w: 170, h: 24 },
+          { x: 1040, y: 450, w: 220, h: 24 },
+          { x: 740, y: 560, w: 200, h: 24 }
+        ],
+        candies: [
+          { x: 380, y: 530, type: 'candyCorn' },
+          { x: 570, y: 430, type: 'pumpkinSweet' },
+          { x: 330, y: 330, type: 'wrappedCandy' },
+          { x: 150, y: 230, type: 'pumpkinSweet' },
+          { x: 420, y: 150, type: 'wrappedCandy' },
+          { x: 720, y: 180, type: 'candyCorn' },
+          { x: 990, y: 260, type: 'pumpkinSweet' },
+          { x: 1140, y: 400, type: 'candyCorn' },
+          { x: 820, y: 510, type: 'wrappedCandy' }
+        ],
+        enemies: [
+          { x: 520, y: 440, minX: 510, maxX: 640, vx: 2.8, type: 'bat', w: 34, h: 24 },
+          { x: 670, y: 190, minX: 660, maxX: 810, vx: 2.6, type: 'bat', w: 34, h: 24 },
+          { x: 920, y: 270, minX: 910, maxX: 1060, vx: 2.4, type: 'spider', w: 32, h: 26 },
+          { x: 760, y: 520, minX: 740, maxX: 920, vx: 2.2, type: 'spider', w: 32, h: 26 }
+        ],
+        hazards: [
+          { x: 260, y: 700, w: 1020, h: 20 } // Giant mist spike abyss
+        ],
+        decorations: [
+          { x: 40, y: 650, type: 'tombstone' },
+          { x: 180, y: 650, type: 'pumpkin', size: 1.1 },
+          { x: 360, y: 200, type: 'candle' },
+          { x: 1200, y: 450, type: 'candle' }
+        ],
+        portal: { x: 1120, y: 370, w: 54, h: 80 }
+      }
+    ];
+
+    // --- Player Class (Little Cute Ghost with Witch Hat) ---
+    class Player {
+      constructor() {
+        this.resetPosition();
+        this.w = 44;
+        this.h = 52;
+        this.vx = 0;
+        this.vy = 0;
+        this.speed = 5.2;
+        this.jumpForce = -13.6;
+        this.gravity = 0.52;
+        this.grounded = false;
+        this.facing = 1; // 1 = right, -1 = left
+        this.floatOffset = 0;
+        this.invulnerableTimer = 0;
+      }
+
+      resetPosition(x = 60, y = 560) {
+        this.x = x;
+        this.y = y;
+        this.vx = 0;
+        this.vy = 0;
+        this.grounded = false;
+        this.facing = 1;
+        this.invulnerableTimer = 60; // Brief spawn protection
+      }
+
+      update(keys, platforms) {
+        // Horizontal Movement
+        if (keys.left) {
+          this.vx = -this.speed;
+          this.facing = -1;
+        } else if (keys.right) {
+          this.vx = this.speed;
+          this.facing = 1;
+        } else {
+          this.vx *= 0.72; // Smooth friction
+          if (Math.abs(this.vx) < 0.1) this.vx = 0;
+        }
+
+        // Jump
+        if (keys.jump && this.grounded) {
+          this.vy = this.jumpForce;
+          this.grounded = false;
+          sound.playJump();
+          spawnBurst(this.x + this.w / 2, this.y + this.h, ['#e9d5ff', '#c084fc', '#ffffff'], 8, 2.5);
+        }
+
+        // Apply Gravity
+        this.vy += this.gravity;
+        if (this.vy > 14) this.vy = 14; // Terminal fall velocity
+
+        // Horizontal Collision
+        this.x += this.vx;
+        // World boundaries
+        if (this.x < 10) this.x = 10;
+        if (this.x + this.w > V_WIDTH - 10) this.x = V_WIDTH - 10 - this.w;
+
+        // Vertical Collision & Platform Stomping
+        this.y += this.vy;
+        this.grounded = false;
+
+        platforms.forEach(plat => {
+          if (
+            this.x + this.w > plat.x &&
+            this.x < plat.x + plat.w &&
+            this.y + this.h >= plat.y &&
+            this.y + this.h <= plat.y + plat.h + 16 &&
+            this.vy >= 0
+          ) {
+            this.y = plat.y - this.h;
+            this.vy = 0;
+            this.grounded = true;
+          }
+        });
+
+        // Floating animation oscillation
+        this.floatOffset = Math.sin(Date.now() * 0.007) * 4;
+
+        if (this.invulnerableTimer > 0) {
+          this.invulnerableTimer--;
+        }
+      }
+
+      draw(c) {
+        c.save();
+
+        // Flash when invulnerable
+        if (this.invulnerableTimer > 0 && Math.floor(Date.now() / 90) % 2 === 0) {
+          c.globalAlpha = 0.45;
+        }
+
+        const cx = this.x + this.w / 2;
+        const cy = this.y + this.h / 2 + (this.grounded ? 0 : this.floatOffset);
+
+        c.translate(cx, cy);
+        if (this.facing === -1) {
+          c.scale(-1, 1);
+        }
+
+        // Ghost outer glow
+        c.shadowColor = 'rgba(255, 230, 255, 0.7)';
+        c.shadowBlur = 15;
+
+        // 1. Ghost Body
+        c.fillStyle = '#ffffff';
+        c.beginPath();
+        // Head dome
+        c.arc(0, -8, 20, Math.PI, 0, false);
+        // Body sides & skirt ripples
+        c.lineTo(20, 16);
+        const t = Date.now() * 0.01;
+        const wave1 = Math.sin(t) * 3;
+        const wave2 = Math.cos(t) * 3;
+
+        // Cute wavy skirt
+        c.bezierCurveTo(14, 23 + wave1, 8, 16, 0, 22 + wave2);
+        c.bezierCurveTo(-8, 16, -14, 23 - wave1, -20, 16);
+        c.lineTo(-20, -8);
+        c.closePath();
+        c.fill();
+
+        // Reset shadow for facial features
+        c.shadowBlur = 0;
+
+        // 2. Cute Blushing Cheeks
+        c.fillStyle = 'rgba(255, 130, 170, 0.65)';
+        c.beginPath();
+        c.arc(12, 1, 4, 0, Math.PI * 2);
+        c.arc(-4, 1, 3.5, 0, Math.PI * 2);
+        c.fill();
+
+        // 3. Adorable Oval Eyes
+        c.fillStyle = '#1e1b4b';
+        c.beginPath();
+        c.ellipse(10, -5, 3.5, 5, 0, 0, Math.PI * 2);
+        c.ellipse(-3, -5, 3.5, 5, 0, 0, Math.PI * 2);
+        c.fill();
+
+        // Eye sparkles
+        c.fillStyle = '#ffffff';
+        c.beginPath();
+        c.arc(11, -7, 1.4, 0, Math.PI * 2);
+        c.arc(-2, -7, 1.4, 0, Math.PI * 2);
+        c.fill();
+
+        // Cute little smile
+        c.strokeStyle = '#431407';
+        c.lineWidth = 1.6;
+        c.lineCap = 'round';
+        c.beginPath();
+        c.arc(3.5, 2, 3, 0.1, Math.PI * 0.9);
+        c.stroke();
+
+        // 4. Little Witch Hat! 🧙‍♀️
+        c.fillStyle = '#311042';
+        // Hat brim
+        c.beginPath();
+        c.ellipse(0, -26, 25, 6, -0.15, 0, Math.PI * 2);
+        c.fill();
+
+        // Hat cone
+        c.beginPath();
+        c.moveTo(-15, -27);
+        c.quadraticCurveTo(-6, -48, 14, -54); // Curled tip
+        c.quadraticCurveTo(4, -36, 15, -25);
+        c.closePath();
+        c.fill();
+
+        // Hat orange ribbon band
+        c.strokeStyle = '#ff7700';
+        c.lineWidth = 4;
+        c.beginPath();
+        c.ellipse(0, -27, 14, 3.5, -0.12, 0, Math.PI);
+        c.stroke();
+
+        // Tiny gold hat buckle
+        c.fillStyle = '#facc15';
+        c.fillRect(-2, -30, 5, 4);
+
+        c.restore();
+      }
+    }
+
+    // --- Game State Controller ---
+    const gameState = {
+      currentLevelIndex: 0,
+      lives: 3,
+      candiesCollected: 0,
+      totalCandiesInLevel: 0,
+      portalActive: false,
+      state: 'MENU', // 'MENU', 'PLAYING', 'LEVEL_CLEARED', 'GAMEOVER', 'VICTORY'
+      levelData: null,
+      keys: { left: false, right: false, jump: false }
+    };
+
+    const player = new Player();
+
+    // --- UI Update Helpers ---
+    const levelDisplay = document.getElementById('level-display');
+    const candyDisplay = document.getElementById('candy-display');
+    const livesDisplay = document.getElementById('lives-display');
+    const uiOverlay = document.getElementById('ui-overlay');
+    const modalEmoji = document.getElementById('modal-emoji');
+    const modalTitle = document.getElementById('modal-title');
+    const modalDesc = document.getElementById('modal-desc');
+    const modalActionBtn = document.getElementById('modal-action-btn');
+    const modalControls = document.getElementById('modal-controls');
+
+    function updateHUD() {
+      levelDisplay.textContent = LEVELS[gameState.currentLevelIndex].shortName;
+      candyDisplay.textContent = `${gameState.candiesCollected} / ${gameState.totalCandiesInLevel}`;
+
+      let heartsHtml = '';
+      for (let i = 0; i < 3; i++) {
+        if (i < gameState.lives) {
+          heartsHtml += '<span class="text-pink-400">💖</span>';
+        } else {
+          heartsHtml += '<span class="text-gray-500 opacity-40">🖤</span>';
+        }
+      }
+      livesDisplay.innerHTML = heartsHtml;
+    }
+
+    function showModal(title, desc, btnText, emoji = '🎃', showControls = false) {
+      modalTitle.textContent = title;
+      modalDesc.textContent = desc;
+      modalActionBtn.textContent = btnText;
+      modalEmoji.textContent = emoji;
+      modalControls.style.display = showControls ? 'flex' : 'none';
+      uiOverlay.classList.remove('hidden');
+    }
+
+    function hideModal() {
+      uiOverlay.classList.add('hidden');
+    }
+
+    // --- Level Loading ---
+    function loadLevel(index) {
+      gameState.currentLevelIndex = index;
+      const rawLevel = LEVELS[index];
+
+      // Deep clone level items so collected items don't disappear on reset
+      gameState.levelData = {
+        name: rawLevel.name,
+        shortName: rawLevel.shortName,
+        skyGrad: rawLevel.skyGrad,
+        moonColor: rawLevel.moonColor,
+        platforms: JSON.parse(JSON.stringify(rawLevel.platforms)),
+        candies: rawLevel.candies.map(c => ({ ...c, collected: false })),
+        enemies: JSON.parse(JSON.stringify(rawLevel.enemies)),
+        hazards: JSON.parse(JSON.stringify(rawLevel.hazards)),
+        decorations: JSON.parse(JSON.stringify(rawLevel.decorations)),
+        portal: { ...rawLevel.portal }
+      };
+
+      gameState.candiesCollected = 0;
+      gameState.totalCandiesInLevel = gameState.levelData.candies.length;
+      gameState.portalActive = false;
+
+      player.resetPosition(60, 560);
+      particles = [];
+      updateHUD();
+    }
+
+    function restartFullGame() {
+      gameState.lives = 3;
+      loadLevel(0);
+      gameState.state = 'PLAYING';
+      hideModal();
+    }
+
+    function startNextLevel() {
+      if (gameState.currentLevelIndex + 1 < LEVELS.length) {
+        loadLevel(gameState.currentLevelIndex + 1);
+        gameState.state = 'PLAYING';
+        hideModal();
+      } else {
+        // Victory!
+        gameState.state = 'VICTORY';
+        sound.playWin();
+        showModal(
+          "Halloween Cleared! 🎉👻",
+          "You helped the little ghost gather all the treats across every spooky realm! You are the sweetest spirit in town!",
+          "Play Again 🍬",
+          "👑"
+        );
+      }
+    }
+
+    // --- Input Handlers (Keyboard & Touch) ---
+    window.addEventListener('keydown', (e) => {
+      if (e.repeat) return;
+      if (e.code === 'KeyA' || e.code === 'ArrowLeft') gameState.keys.left = true;
+      if (e.code === 'KeyD' || e.code === 'ArrowRight') gameState.keys.right = true;
+      if (e.code === 'KeyW' || e.code === 'ArrowUp' || e.code === 'Space') {
+        gameState.keys.jump = true;
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.code === 'KeyA' || e.code === 'ArrowLeft') gameState.keys.left = false;
+      if (e.code === 'KeyD' || e.code === 'ArrowRight') gameState.keys.right = false;
+      if (e.code === 'KeyW' || e.code === 'ArrowUp' || e.code === 'Space') {
+        gameState.keys.jump = false;
+      }
+    });
+
+    // Touch Buttons Setup
+    const setupTouchBtn = (id, keyName) => {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      const setKey = (val) => {
+        gameState.keys[keyName] = val;
+      };
+      btn.addEventListener('touchstart', (e) => { e.preventDefault(); setKey(true); });
+      btn.addEventListener('touchend', (e) => { e.preventDefault(); setKey(false); });
+      btn.addEventListener('mousedown', () => setKey(true));
+      btn.addEventListener('mouseup', () => setKey(false));
+      btn.addEventListener('mouseleave', () => setKey(false));
+    };
+
+    setupTouchBtn('touch-left', 'left');
+    setupTouchBtn('touch-right', 'right');
+    setupTouchBtn('touch-jump', 'jump');
+
+    // Modal action button click
+    modalActionBtn.addEventListener('click', () => {
+      sound.init();
+      if (gameState.state === 'MENU' || gameState.state === 'GAMEOVER' || gameState.state === 'VICTORY') {
+        restartFullGame();
+      } else if (gameState.state === 'LEVEL_CLEARED') {
+        startNextLevel();
+      }
+    });
+
+    // --- Player Damage / Life Loss ---
+    function playerHit() {
+      if (player.invulnerableTimer > 0) return;
+
+      sound.playHurt();
+      spawnBurst(player.x + player.w / 2, player.y + player.h / 2, ['#ff4444', '#ff77aa', '#ffffff'], 20, 5);
+      gameState.lives--;
+      updateHUD();
+
+      if (gameState.lives <= 0) {
+        gameState.state = 'GAMEOVER';
+        sound.playGameOver();
+        showModal(
+          "Spooky Oof! 🎃",
+          "The little ghost ran out of sweet energy! Don't worry, ghosts can always float back up!",
+          "Try Again 🍭",
+          "💀"
+        );
+      } else {
+        // Respawn at starting point
+        player.resetPosition(60, 560);
+      }
+    }
+
+    // --- Decorative Drawing Routines ---
+    function drawSkyAndMoon(c, level) {
+      // 1. Sky Gradient
+      const grad = c.createLinearGradient(0, 0, 0, V_HEIGHT);
+      grad.addColorStop(0, level.skyGrad[0]);
+      grad.addColorStop(0.65, level.skyGrad[1]);
+      grad.addColorStop(1, level.skyGrad[2]);
+      c.fillStyle = grad;
+      c.fillRect(0, 0, V_WIDTH, V_HEIGHT);
+
+      // 2. Stars
+      stars.forEach(s => {
+        s.alpha += s.blinkSpeed;
+        const currentAlpha = 0.3 + Math.abs(Math.sin(s.alpha)) * 0.7;
+        c.fillStyle = `rgba(255, 255, 230, ${currentAlpha})`;
+        c.beginPath();
+        c.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+        c.fill();
+      });
+
+      // 3. Glowing Big Moon
+      const mx = 1050;
+      const my = 140;
+      const mRadius = 64;
+
+      const moonGlow = c.createRadialGradient(mx, my, mRadius * 0.5, mx, my, mRadius * 2.2);
+      moonGlow.addColorStop(0, 'rgba(254, 240, 138, 0.5)');
+      moonGlow.addColorStop(0.5, 'rgba(251, 146, 60, 0.2)');
+      moonGlow.addColorStop(1, 'rgba(0,0,0,0)');
+      c.fillStyle = moonGlow;
+      c.beginPath();
+      c.arc(mx, my, mRadius * 2.2, 0, Math.PI * 2);
+      c.fill();
+
+      // Moon body
+      c.fillStyle = level.moonColor || '#fef08a';
+      c.beginPath();
+      c.arc(mx, my, mRadius, 0, Math.PI * 2);
+      c.fill();
+
+      // Subtle craters
+      c.fillStyle = 'rgba(0, 0, 0, 0.07)';
+      c.beginPath();
+      c.arc(mx - 18, my - 12, 14, 0, Math.PI * 2);
+      c.arc(mx + 22, my + 14, 18, 0, Math.PI * 2);
+      c.arc(mx - 6, my + 26, 10, 0, Math.PI * 2);
+      c.fill();
+
+      // 4. Fireflies
+      fireflies.forEach(f => {
+        f.angle += f.speed;
+        const fy = f.y + Math.sin(f.angle) * 12;
+        const fx = f.x + Math.cos(f.angle * 0.7) * 8;
+        c.fillStyle = f.color;
+        c.shadowColor = f.color;
+        c.shadowBlur = 10;
+        c.beginPath();
+        c.arc(fx, fy, f.radius, 0, Math.PI * 2);
+        c.fill();
+        c.shadowBlur = 0;
+      });
+    }
+
+    function drawPlatform(c, p) {
+      c.save();
+      if (p.type === 'ground') {
+        // Ground brick/earth texture
+        const grad = c.createLinearGradient(0, p.y, 0, p.y + p.h);
+        grad.addColorStop(0, '#381647');
+        grad.addColorStop(0.2, '#210d2b');
+        grad.addColorStop(1, '#110517');
+        c.fillStyle = grad;
+        c.fillRect(p.x, p.y, p.w, p.h);
+
+        // Top grass/spooky trim
+        c.fillStyle = '#6b21a8';
+        c.fillRect(p.x, p.y, p.w, 6);
+        c.fillStyle = '#a855f7';
+        c.fillRect(p.x, p.y, p.w, 2);
+      } else {
+        // Floating wooden/runic islands
+        c.fillStyle = '#4c1d95';
+        c.beginPath();
+        c.roundRect(p.x, p.y, p.w, p.h, 10);
+        c.fill();
+
+        // Edge highlight
+        c.strokeStyle = '#c084fc';
+        c.lineWidth = 2.5;
+        c.stroke();
+
+        // Decorative rune lines
+        c.fillStyle = '#7c3aed';
+        c.fillRect(p.x + 12, p.y + 4, p.w - 24, 3);
+      }
+      c.restore();
+    }
+
+    function drawCandy(c, item) {
+      if (item.collected) return;
+      const cx = item.x;
+      const cy = item.y + Math.sin(Date.now() * 0.005 + item.x) * 4;
+
+      c.save();
+      c.translate(cx, cy);
+
+      // Sweet candy shine glow
+      c.shadowColor = '#fde047';
+      c.shadowBlur = 12;
+
+      if (item.type === 'candyCorn') {
+        // Candy Corn Triangle
+        c.beginPath();
+        c.moveTo(0, -14);
+        c.lineTo(12, 10);
+        c.lineTo(-12, 10);
+        c.closePath();
+        c.fillStyle = '#f97316';
+        c.fill();
+
+        // Top white tip
+        c.beginPath();
+        c.moveTo(0, -14);
+        c.lineTo(5, -4);
+        c.lineTo(-5, -4);
+        c.closePath();
+        c.fillStyle = '#ffffff';
+        c.fill();
+
+        // Bottom yellow base
+        c.beginPath();
+        c.moveTo(-9, 3);
+        c.lineTo(9, 3);
+        c.lineTo(12, 10);
+        c.lineTo(-12, 10);
+        c.closePath();
+        c.fillStyle = '#facc15';
+        c.fill();
+      } else if (item.type === 'pumpkinSweet') {
+        // Cute mini pumpkin candy
+        c.fillStyle = '#f97316';
+        c.beginPath();
+        c.ellipse(0, 0, 13, 10, 0, 0, Math.PI * 2);
+        c.fill();
+        c.strokeStyle = '#c2410c';
+        c.lineWidth = 1.5;
+        c.stroke();
+
+        // Green stem
+        c.fillStyle = '#22c55e';
+        c.fillRect(-2, -14, 4, 6);
+      } else {
+        // Wrapped Swirl Candy
+        // Wrappers left/right
+        c.fillStyle = '#e879f9';
+        c.beginPath();
+        c.moveTo(-10, 0); c.lineTo(-18, -6); c.lineTo(-18, 6); c.closePath();
+        c.moveTo(10, 0); c.lineTo(18, -6); c.lineTo(18, 6); c.closePath();
+        c.fill();
+
+        // Candy round center
+        c.fillStyle = '#f43f5e';
+        c.beginPath();
+        c.arc(0, 0, 10, 0, Math.PI * 2);
+        c.fill();
+
+        // Candy white stripe
+        c.fillStyle = '#ffffff';
+        c.beginPath();
+        c.arc(0, 0, 5, 0, Math.PI * 2);
+        c.fill();
+      }
+
+      c.restore();
+    }
+
+    function drawBatEnemy(c, e) {
+      c.save();
+      c.translate(e.x + e.w / 2, e.y + e.h / 2);
+      if (e.vx < 0) c.scale(-1, 1);
+
+      // Flapping wing calculation
+      const flap = Math.sin(Date.now() * 0.015) * 8;
+
+      // Bat wings
+      c.fillStyle = '#581c87';
+      c.beginPath();
+      // Right wing
+      c.moveTo(0, -2);
+      c.quadraticCurveTo(14, -14 - flap, 24, -4 - flap);
+      c.quadraticCurveTo(16, 8, 4, 4);
+      // Left wing
+      c.moveTo(0, -2);
+      c.quadraticCurveTo(-14, -14 - flap, -24, -4 - flap);
+      c.quadraticCurveTo(-16, 8, -4, 4);
+      c.fill();
+
+      // Bat cute round body
+      c.fillStyle = '#2e1065';
+      c.beginPath();
+      c.arc(0, 0, 10, 0, Math.PI * 2);
+      c.fill();
+
+      // Bat ears
+      c.beginPath();
+      c.moveTo(-7, -7); c.lineTo(-10, -16); c.lineTo(-2, -9);
+      c.moveTo(7, -7); c.lineTo(10, -16); c.lineTo(2, -9);
+      c.fill();
+
+      // Red glowing eyes
+      c.fillStyle = '#ff2255';
+      c.beginPath();
+      c.arc(3, -2, 2.2, 0, Math.PI * 2);
+      c.arc(-3, -2, 2.2, 0, Math.PI * 2);
+      c.fill();
+
+      // Tiny white fangs
+      c.fillStyle = '#ffffff';
+      c.beginPath();
+      c.moveTo(-3, 3); c.lineTo(-2, 6); c.lineTo(-1, 3);
+      c.moveTo(1, 3); c.lineTo(2, 6); c.lineTo(3, 3);
+      c.fill();
+
+      c.restore();
+    }
+
+    function drawSpiderEnemy(c, s) {
+      c.save();
+      const bounce = Math.abs(Math.sin(Date.now() * 0.01)) * 6;
+      c.translate(s.x + s.w / 2, s.y + s.h / 2 - bounce);
+
+      // Spider thread hanging
+      c.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      c.lineWidth = 1.2;
+      c.beginPath();
+      c.moveTo(0, -60);
+      c.lineTo(0, 0);
+      c.stroke();
+
+      // Legs
+      c.strokeStyle = '#1e1b4b';
+      c.lineWidth = 2.4;
+      const legSpread = Math.sin(Date.now() * 0.012) * 3;
+      // Left legs
+      c.beginPath();
+      c.moveTo(-4, 0); c.lineTo(-16, -6 + legSpread); c.lineTo(-22, 6);
+      c.moveTo(-4, 4); c.lineTo(-17, 8 + legSpread); c.lineTo(-20, 18);
+      // Right legs
+      c.moveTo(4, 0); c.lineTo(16, -6 - legSpread); c.lineTo(22, 6);
+      c.moveTo(4, 4); c.lineTo(17, 8 - legSpread); c.lineTo(20, 18);
+      c.stroke();
+
+      // Spider body
+      c.fillStyle = '#311042';
+      c.beginPath();
+      c.arc(0, 0, 12, 0, Math.PI * 2);
+      c.fill();
+
+      // Spider eyes (lots of cute purple dots)
+      c.fillStyle = '#a855f7';
+      c.beginPath();
+      c.arc(-4, -2, 2.5, 0, Math.PI * 2);
+      c.arc(4, -2, 2.5, 0, Math.PI * 2);
+      c.arc(-7, 2, 1.8, 0, Math.PI * 2);
+      c.arc(7, 2, 1.8, 0, Math.PI * 2);
+      c.fill();
+
+      c.restore();
+    }
+
+    function drawHazard(c, h) {
+      c.save();
+      c.fillStyle = '#991b1b';
+      const count = Math.floor(h.w / 18);
+      for (let i = 0; i < count; i++) {
+        const hx = h.x + i * 18;
+        c.beginPath();
+        c.moveTo(hx, h.y + h.h);
+        c.lineTo(hx + 9, h.y);
+        c.lineTo(hx + 18, h.y + h.h);
+        c.closePath();
+        c.fill();
+
+        // Spike tip highlight
+        c.strokeStyle = '#ef4444';
+        c.lineWidth = 1.2;
+        c.stroke();
+      }
+      c.restore();
+    }
+
+    function drawDecorations(c, decs) {
+      decs.forEach(d => {
+        c.save();
+        if (d.type === 'pumpkin') {
+          const s = d.size || 1;
+          c.translate(d.x, d.y);
+          c.scale(s, s);
+
+          // Pumpkin Body
+          c.fillStyle = '#ea580c';
+          c.beginPath();
+          c.ellipse(0, -16, 20, 16, 0, 0, Math.PI * 2);
+          c.fill();
+
+          c.fillStyle = '#f97316';
+          c.beginPath();
+          c.ellipse(0, -16, 12, 16, 0, 0, Math.PI * 2);
+          c.fill();
+
+          // Jack-o'-lantern glowing eyes & smile!
+          c.fillStyle = '#fef08a';
+          c.shadowColor = '#facc15';
+          c.shadowBlur = 10;
+          c.beginPath();
+          // Eyes
+          c.moveTo(-9, -20); c.lineTo(-5, -20); c.lineTo(-7, -24); c.closePath();
+          c.moveTo(9, -20); c.lineTo(5, -20); c.lineTo(7, -24); c.closePath();
+          // Grin
+          c.moveTo(-10, -13);
+          c.lineTo(-6, -10);
+          c.lineTo(-3, -12);
+          c.lineTo(0, -9);
+          c.lineTo(3, -12);
+          c.lineTo(6, -10);
+          c.lineTo(10, -13);
+          c.lineTo(6, -8);
+          c.lineTo(-6, -8);
+          c.closePath();
+          c.fill();
+          c.shadowBlur = 0;
+
+          // Green stem
+          c.fillStyle = '#15803d';
+          c.fillRect(-2, -34, 4, 6);
+        } else if (d.type === 'tombstone') {
+          c.translate(d.x, d.y);
+          c.fillStyle = '#64748b';
+          c.beginPath();
+          c.roundRect(-16, -38, 32, 38, [12, 12, 2, 2]);
+          c.fill();
+
+          // RIP text
+          c.fillStyle = '#334155';
+          c.font = '10px sans-serif';
+          c.textAlign = 'center';
+          c.fillText('RIP', 0, -22);
+          c.fillText('✦', 0, -10);
+        } else if (d.type === 'tree') {
+          c.translate(d.x, d.y);
+          c.strokeStyle = '#1e1028';
+          c.lineWidth = 14;
+          c.lineCap = 'round';
+          c.beginPath();
+          c.moveTo(0, 0);
+          c.quadraticCurveTo(-15, -70, -25, -130);
+          c.stroke();
+
+          // Spooky bare branches
+          c.lineWidth = 7;
+          c.beginPath();
+          c.moveTo(-15, -60); c.lineTo(-50, -90);
+          c.moveTo(-20, -95); c.lineTo(20, -125);
+          c.moveTo(-25, -130); c.lineTo(-55, -165);
+          c.stroke();
+        } else if (d.type === 'candle') {
+          c.translate(d.x, d.y);
+          c.fillStyle = '#fde68a';
+          c.fillRect(-4, -18, 8, 18);
+          // Flame
+          c.fillStyle = '#f97316';
+          c.shadowColor = '#facc15';
+          c.shadowBlur = 8;
+          c.beginPath();
+          c.ellipse(0, -23 + Math.sin(Date.now() * 0.02) * 1.5, 3.5, 6, 0, 0, Math.PI * 2);
+          c.fill();
+        }
+        c.restore();
+      });
+    }
+
+    function drawPortal(c, portal, isActive) {
+      c.save();
+      const cx = portal.x + portal.w / 2;
+      const cy = portal.y + portal.h / 2;
+      c.translate(cx, cy);
+
+      if (isActive) {
+        // Glowing animated swirling vortex
+        const t = Date.now() * 0.005;
+        const outerGlow = c.createRadialGradient(0, 0, 10, 0, 0, 48);
+        outerGlow.addColorStop(0, 'rgba(244, 63, 94, 0.9)');
+        outerGlow.addColorStop(0.5, 'rgba(168, 85, 247, 0.7)');
+        outerGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        c.fillStyle = outerGlow;
+        c.beginPath();
+        c.arc(0, 0, 52, 0, Math.PI * 2);
+        c.fill();
+
+        // Swirling Portal Rim
+        c.save();
+        c.rotate(t);
+        c.strokeStyle = '#facc15';
+        c.lineWidth = 4;
+        c.setLineDash([14, 8]);
+        c.beginPath();
+        c.ellipse(0, 0, 24, 40, 0, 0, Math.PI * 2);
+        c.stroke();
+        c.restore();
+
+        // Inner magical core
+        c.fillStyle = '#ffffff';
+        c.beginPath();
+        c.ellipse(0, 0, 14, 28, 0, 0, Math.PI * 2);
+        c.fill();
+
+        // Floating hint text
+        c.fillStyle = '#fde047';
+        c.font = 'bold 13px Fredoka One, sans-serif';
+        c.textAlign = 'center';
+        c.fillText('OPEN! ➜', 0, -48 + Math.sin(Date.now() * 0.008) * 3);
+      } else {
+        // Inactive Gothic stone door frame
+        c.fillStyle = '#2e1065';
+        c.beginPath();
+        c.roundRect(-portal.w / 2, -portal.h / 2, portal.w, portal.h, [26, 26, 4, 4]);
+        c.fill();
+        c.strokeStyle = '#6b21a8';
+        c.lineWidth = 3;
+        c.stroke();
+
+        // Locked keyhole
+        c.fillStyle = '#a855f7';
+        c.beginPath();
+        c.arc(0, -2, 5, 0, Math.PI * 2);
+        c.rect(-2.5, 0, 5, 8);
+        c.fill();
+
+        // Lock icon text
+        c.font = '14px sans-serif';
+        c.textAlign = 'center';
+        c.fillText('🔒', 0, -20);
+      }
+      c.restore();
+    }
+
+    // --- Main Game Loop ---
+    let lastTime = 0;
+
+    function gameLoop(time) {
+      requestAnimationFrame(gameLoop);
+
+      // Clear frame
+      ctx.clearRect(0, 0, V_WIDTH, V_HEIGHT);
+
+      if (!gameState.levelData) return;
+
+      const level = gameState.levelData;
+
+      // 1. Draw Background & Sky
+      drawSkyAndMoon(ctx, level);
+
+      // 2. Draw Scenic Props
+      drawDecorations(ctx, level.decorations);
+
+      // 3. Draw Hazards (Thorns)
+      level.hazards.forEach(h => drawHazard(ctx, h));
+
+      // 4. Draw Platforms
+      level.platforms.forEach(p => drawPlatform(ctx, p));
+
+      // 5. Draw Portal
+      drawPortal(ctx, level.portal, gameState.portalActive);
+
+      // 6. Draw Candies
+      level.candies.forEach(candy => drawCandy(ctx, candy));
+
+      // 7. Update & Draw Enemies
+      level.enemies.forEach(e => {
+        if (gameState.state === 'PLAYING') {
+          e.x += e.vx;
+          if (e.x < e.minX) {
+            e.x = e.minX;
+            e.vx *= -1;
+          } else if (e.x > e.maxX) {
+            e.x = e.maxX;
+            e.vx *= -1;
+          }
+
+          // Player collision with enemy
+          if (
+            player.x + player.w > e.x &&
+            player.x < e.x + e.w &&
+            player.y + player.h > e.y &&
+            player.y < e.y + e.h
+          ) {
+            playerHit();
+          }
+        }
+
+        if (e.type === 'bat') {
+          drawBatEnemy(ctx, e);
+        } else if (e.type === 'spider') {
+          drawSpiderEnemy(ctx, e);
+        }
+      });
+
+      // 8. Hazard (Thorn/Pit) Collision Check
+      if (gameState.state === 'PLAYING') {
+        level.hazards.forEach(h => {
+          if (
+            player.x + player.w > h.x &&
+            player.x < h.x + h.w &&
+            player.y + player.h > h.y &&
+            player.y < h.y + h.h
+          ) {
+            playerHit();
+          }
+        });
+
+        // Pit bottom death check
+        if (player.y > V_HEIGHT + 40) {
+          playerHit();
+        }
+      }
+
+      // 9. Candy Collection Check
+      if (gameState.state === 'PLAYING') {
+        level.candies.forEach(candy => {
+          if (!candy.collected) {
+            const dist = Math.hypot(
+              (player.x + player.w / 2) - candy.x,
+              (player.y + player.h / 2) - candy.y
+            );
+            if (dist < 34) {
+              candy.collected = true;
+              gameState.candiesCollected++;
+              sound.playCandy();
+              spawnBurst(candy.x, candy.y, ['#fde047', '#fb923c', '#ffffff'], 14, 3.5);
+              updateHUD();
+
+              // Check if all collected
+              if (gameState.candiesCollected >= gameState.totalCandiesInLevel) {
+                gameState.portalActive = true;
+                sound.playJump();
+                spawnBurst(level.portal.x + level.portal.w / 2, level.portal.y + level.portal.h / 2, ['#a855f7', '#ec4899', '#facc15'], 30, 6);
+              }
+            }
+          }
+        });
+
+        // 10. Portal Exit Check
+        if (gameState.portalActive) {
+          const port = level.portal;
+          if (
+            player.x + player.w > port.x &&
+            player.x < port.x + port.w &&
+            player.y + player.h > port.y &&
+            player.y < port.y + port.h
+          ) {
+            // Level Cleared!
+            gameState.state = 'LEVEL_CLEARED';
+            sound.playWin();
+            spawnBurst(player.x + player.w / 2, player.y + player.h / 2, ['#38bdf8', '#c084fc', '#facc15', '#ffffff'], 45, 6);
+
+            const isLast = gameState.currentLevelIndex + 1 >= LEVELS.length;
+            showModal(
+              isLast ? "All Realms Cleared! 🎃" : "Stage Clear! 🍬",
+              isLast
+                ? "Incredible job! You unlocked the Grand Halloween Gateway!"
+                : `You collected all the candies in ${level.name}! Ready for the next spooky realm?`,
+              isLast ? "Claim Victory! 👑" : "Next Stage ➜",
+              "🌟"
+            );
+          }
+        }
+      }
+
+      // 11. Update & Draw Particles
+      particles = particles.filter(p => p.life > 0);
+      particles.forEach(p => {
+        p.update();
+        p.draw(ctx);
+      });
+
+      // 12. Update & Draw Player
+      if (gameState.state === 'PLAYING') {
+        player.update(gameState.keys, level.platforms);
+      }
+      player.draw(ctx);
+    }
+
+    // Start in initial Menu mode
+    window.onload = function() {
+      loadLevel(0);
+      gameState.state = 'MENU';
+      showModal(
+        "Spooky Sweets 🎃",
+        "A cute Halloween adventure! Float with the little ghost, dodge tricky bats and spiders, and gather every delicious treat to open the portal!",
+        "Play Game 🍬",
+        "👻",
+        true
+      );
+      requestAnimationFrame(gameLoop);
+    };
+  </script>
+</body>
+</html>
